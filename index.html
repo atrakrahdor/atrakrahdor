@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="مدرسه آموزش از راه دور و مهارت آموزی اترک؛ معرفی مدرسه، خدمات آموزشی، اخبار و راهنمای دانش‌آموزان" name="description"/>
+<meta content="index, follow" name="robots"/>
+<meta content="مدرسه آموزش از راه دور و مهارت آموزی اترک" property="og:title"/>
+<meta content="مدرسه آموزش از راه دور و مهارت آموزی اترک؛ معرفی مدرسه، خدمات آموزشی، اخبار و راهنمای دانش‌آموزان" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="fa_IR" property="og:locale"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="مدرسه آموزش از راه دور و مهارت آموزی اترک" name="twitter:title"/>
+<meta content="مدرسه آموزش از راه دور و مهارت آموزی اترک؛ معرفی مدرسه، خدمات آموزشی، اخبار و راهنمای دانش‌آموزان" name="twitter:description"/>
+<meta content="#6d28d9" name="theme-color"/>
+<title>مدرسه آموزش از راه دور و مهارت آموزی اترک</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="atrak-logo.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="light">
+<div class="bg-shapes-layer">
+<svg class="bg-shape" style="top:10%; left:5%; width:60px; height:60px;" viewbox="0 0 100 100"><polygon points="50,15 90,85 10,85" stroke="rgba(236,72,153,0.5)"></polygon></svg>
+<svg class="bg-shape" style="top:25%; right:8%; width:50px; height:50px;" viewbox="0 0 100 100"><rect height="70" stroke="rgba(168,85,247,0.5)" width="70" x="15" y="15"></rect></svg>
+<svg class="bg-shape" style="top:60%; left:12%; width:55px; height:55px;" viewbox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(236,72,153,0.5)"></circle></svg>
+<svg class="bg-shape" style="top:75%; right:15%; width:70px; height:30px;" viewbox="0 0 100 40"><line stroke="rgba(168,85,247,0.5)" stroke-dasharray="8 8" x1="0" x2="100" y1="20" y2="20"></line></svg>
+</div>
+<!-- Admin Status Bar -->
+<div class="admin-banner" id="adminBanner">
+<span>⚙️ حالت مدیریت فعال است (روی متن‌ها کلیک کنید تا ویرایش شوند، روی آیکون‌ها کلیک کنید تا از بین ۱۰۰ آیکون انتخاب کنید)</span>
+<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+<label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer; background:rgba(0,0,0,0.15); padding:4px 10px; border-radius:50px;">
+                رنگ متن فعال: <input aria-label="انتخاب رنگ متن مدیریت" id="adminColorPicker" onchange="applyColorToActiveElement(this.value)" style="border:none; width:26px; height:22px; cursor:pointer; background:none;" type="color" value="#4a154b"/>
+</label>
+<label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer; background:rgba(0,0,0,0.15); padding:4px 10px; border-radius:50px;">
+                رنگ آیکون‌ها: <input aria-label="انتخاب رنگ آیکون‌ها" id="adminIconColorPicker" onchange="applyColorToSelectedIcon(this.value)" style="border:none; width:26px; height:22px; cursor:pointer; background:none;" type="color" value="#ec4899"/>
+</label>
+<label style="font-size:12px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.15); padding:4px 10px; border-radius:50px;">
+    اندازه متن:
+    <button onclick="changeActiveTextSize(-1)" aria-label="کاهش اندازه متن" style="border:none; border-radius:6px; padding:2px 8px; cursor:pointer; font-weight:bold;" type="button">
+        −
+    </button>
+<input aria-label="اندازه فونت مدیریت" id="adminFontSizeInput" max="72" min="8" onchange="setActiveTextSize(this.value)" step="1" style="width:48px; height:24px; border:none; border-radius:5px; text-align:center;" type="number" value="16"/>
+<span>px</span>
+<button onclick="changeActiveTextSize(1)" aria-label="افزایش اندازه متن" style="border:none; border-radius:6px; padding:2px 8px; cursor:pointer; font-weight:bold;" type="button">
+        +
+    </button>
+</label>
+<button class="btn-primary" onclick="saveAllEdits()" style="padding:4px 14px; font-size:12px; background:#065f46;" type="button">💾 ذخیره تغییرات</button>
+<button class="btn-primary" onclick="openDynamicElementMenu()" style="padding:4px 14px; font-size:12px; background:#7c3aed;" type="button">＋ افزودن عنصر</button>
+<button class="btn-primary" onclick="toggleAdmin(false)" style="padding:4px 14px; font-size:12px; background:#dc2626;" type="button">خروج از مدیریت</button>
+</div>
+</div>
+<header aria-label="سربرگ سایت" class="top-navbar">
+<div class="nav-right">
+<a aria-label="اینستاگرام" class="nav-social-link" href="https://instagram.com/atrak_rahdor" rel="noopener noreferrer" target="_blank" title="اینستاگرام">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20">
+<rect height="20" rx="5" ry="5" width="20" x="2" y="2"></rect>
+<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+<line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+</svg>
+</a>
+<a aria-label="تلگرام" class="nav-social-link" href="https://t.me/atrak_rahdor" rel="noopener noreferrer" target="_blank" title="تلگرام">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20">
+<line x1="22" x2="11" y1="2" y2="13"></line>
+<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+</svg>
+</a>
+<a aria-label="شبکه اجتماعی شاد" class="nav-social-link" href="https://shad.ir/atrakrahdor" rel="noopener noreferrer" target="_blank" title="شاد">
+<svg aria-hidden="true" height="28" viewbox="0 0 225 225" width="28" xmlns="http://www.w3.org/2000/svg">
+<!-- دایره بالایی -->
+<circle cx="112.5" cy="60" fill="#ffffff" r="21" stroke="currentColor" stroke-width="5"></circle>
+<!-- دایره چپ -->
+<circle cx="80" cy="102" fill="#ffffff" r="21" stroke="currentColor" stroke-width="5"></circle>
+<!-- دایره راست -->
+<circle cx="145" cy="102" fill="#ffffff" r="21" stroke="currentColor" stroke-width="5"></circle>
+<!-- قسمت پایینی -->
+<path d="
+            M43 132
+            C43 129 46 128 49 130
+            L68 145
+            C75 151 80 151 87 148
+            L104 136
+            C107 134 110 133 112.5 133
+
+            C115 133 118 134 121 136
+            L138 148
+            C145 151 150 151 157 145
+            L176 130
+            C179 128 182 129 182 132
+
+            L182 160
+            C182 163 182 165 180 167
+            L158 185
+            C152 189 147 189 141 185
+            L121 171
+            C118 169 115 168 112.5 168
+            C110 168 107 169 104 171
+            L84 185
+            C78 189 73 189 67 185
+            L45 167
+            C43 165 43 163 43 160
+            Z
+        " fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"></path>
+</svg>
+</a>
+</div>
+<div class="brand-container">
+<h1 class="brand-title">
+<img alt="آرم مدرسه آموزش از راه دور اترک" class="school-logo" src="atrak-logo.png" fetchpriority="high" decoding="async">
+<span data-editable="brand-title">مدرسه آموزش از راه دور و مهارت آموزی اترک</span>
+</h1>
+<div class="brand-sub">
+<svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" x2="22" y1="12" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+<span data-editable="brand-sub">اولین مدرسه مجازی و الکترونیکی استان خراسان شمالی مجهز به LMS</span>
+</div>
+</div>
+<div class="nav-left">
+<div class="phone-contact">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16">
+<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+</svg>
+<span data-editable="phone-number">09905117017 - 09397069089</span>
+</div>
+<button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تغییر حالت روشن/تاریک" type="button">
+<svg class="theme-icon-svg" id="themeIconSvg" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</button>
+<button class="admin-quick-btn" onclick="promptAdminLogin()" title="ورود مدیریت" type="button">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16">
+<rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect>
+<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+</svg>
+</button>
+<button class="student-login-btn" id="studentLoginBtn" onclick="promptStudentLogin()" title="ورود دانش آموز" type="button">
+<svg aria-hidden="true" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16">
+<path d="M20 21a8 8 0 0 0-16 0"></path>
+<circle cx="12" cy="7" r="4"></circle>
+</svg>
+<span id="studentLoginLabel">ورود</span>
+</button>
+</div>
+</header>
+<nav aria-label="ناوبری اصلی سایت" class="atrak-second-navbar" id="atrakSecondNavbar">
+<div class="atrak-second-navbar-inner">
+<button class="atrak-second-nav-item" onclick="navigateTo('home')" type="button">
+            صفحه اصلی
+        </button>
+<!-- =========================
+             مقاطع
+        ========================== -->
+<div class="atrak-second-dropdown" id="atrakMaghtaDropdown">
+<button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakMaghtaDropdown')" type="button">
+
+                مقاطع
+
+                <span class="atrak-dropdown-arrow">⌄</span>
+</button>
+<div class="atrak-maghta-menu">
+<!-- متوسطه اول -->
+<div class="atrak-maghta-item">
+<button class="atrak-maghta-title" type="button">
+
+                        متوسطه اول
+
+                        <span>‹</span>
+</button>
+<div class="atrak-maghta-submenu">
+<button onclick="navigateTo('maghta-m1-p7')" type="button">
+                            پایه هفتم
+                        </button>
+<button onclick="navigateTo('maghta-m1-p8')" type="button">
+                            پایه هشتم
+                        </button>
+<button onclick="navigateTo('maghta-m1-p9')" type="button">
+                            پایه نهم
+                        </button>
+</div>
+</div>
+<!-- متوسطه دوم -->
+<div class="atrak-maghta-item">
+<button class="atrak-maghta-title" type="button">
+
+                        متوسطه دوم
+
+                        <span>‹</span>
+</button>
+<div class="atrak-maghta-submenu">
+<button onclick="navigateTo('maghta-m2-p10')" type="button">
+                            پایه دهم
+                        </button>
+<button onclick="navigateTo('maghta-m2-p11')" type="button">
+                            پایه یازدهم
+                        </button>
+<button onclick="navigateTo('maghta-m2-p12')" type="button">
+                            پایه دوازدهم
+                        </button>
+</div>
+</div>
+<!-- کاردانش -->
+<div class="atrak-maghta-item">
+<button class="atrak-maghta-title" onclick="navigateTo('maghta-kardanesh')" type="button">
+
+                        کاردانش
+
+                    </button>
+</div>
+</div>
+</div>
+<!-- =========================
+             خدمات
+        ========================== -->
+<div class="atrak-second-dropdown" id="atrakServicesDropdown">
+<button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakServicesDropdown')" type="button">
+
+                خدمات
+
+                <span class="atrak-dropdown-arrow">⌄</span>
+</button>
+<div class="atrak-services-menu">
+<button onclick="navigateTo('services')" type="button">
+    خدمات ما
+</button>
+<button onclick="navigateTo('virtual-edu')" type="button">
+                    آموزش مجازی
+                </button>
+<button onclick="navigateTo('monitoring')" type="button">
+                    نظارت مستمر
+                </button>
+<button onclick="navigateTo('support')" type="button">
+                    مشاور من
+                </button>
+<button onclick="navigateTo('resources')" type="button">
+                    منابع آموزشی
+                </button>
+<button onclick="navigateTo('certificate')" type="button">
+                    صدور مدرک
+                </button>
+<!-- مقاطع جدید -->
+<button onclick="navigateTo('maghta')" type="button">
+                    مقاطع
+                </button>
+</div>
+</div>
+<!-- اخبار -->
+<button class="atrak-second-nav-item" onclick="navigateTo('news-archive')" type="button">
+            اخبار
+        </button>
+<!-- آموزش از راه دور -->
+<div class="atrak-second-dropdown" id="atrakRemoteDropdown">
+<button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakRemoteDropdown')" type="button">
+
+                آموزش از راه دور
+
+                <span class="atrak-dropdown-arrow">⌄</span>
+</button>
+<div class="atrak-remote-menu">
+<button onclick="secondNavMessage('school')" type="button">
+                    مدرسه آموزش از راه دور اترک
+                </button>
+<button onclick="navigateTo('distance-history')" type="button">
+    تاریخچه آموزش از راه دور در جهان
+</button>
+<button onclick="navigateTo('online-school')" type="button">
+                    مدرسه آنلاین
+                </button>
+<button onclick="navigateTo('home')" type="button">
+    صفحه اصلی
+</button>
+</div>
+</div>
+<!-- سوالات متداول -->
+<button class="atrak-second-nav-item" onclick="secondNavMessage('faq')" type="button">
+
+            سوالات متداول
+
+        </button>
+</div>
+</nav>
+<div class="page-navigation-bar" id="pageNavigationBar">
+<!-- سمت راست: دکمه‌های عقب و جلو -->
+<div class="nav-history-controls">
+<button aria-label="صفحه قبلی" class="nav-arrow-btn" id="btnBack" onclick="navGoBack()" title="صفحه قبلی" type="button">
+            ➔
+        </button>
+<button aria-label="صفحه بعدی" class="nav-arrow-btn" id="btnForward" onclick="navGoForward()" style="transform: scaleX(-1);" title="صفحه بعدی" type="button">
+            ➔
+        </button>
+</div>
+<!-- وسط/بخش تاریخچه صفحات -->
+<div class="breadcrumbs" id="breadcrumbTrail">
+<span class="breadcrumb-item" onclick="navigateTo('home')">
+            صفحه اصلی
+        </span>
+</div>
+<!-- مشاور من -->
+<button class="my-advisor-btn" onclick="navigateTo('support')" title="ورود به بخش مشاور من" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+<path d="M8 10h.01"></path>
+<path d="M12 10h.01"></path>
+<path d="M16 10h.01"></path>
+</svg>
+<span>مشاور من</span>
+</button>
+<div class="compact-nav-left">
+<!-- دکمه تغییر تم -->
+<button aria-label="تغییر حالت روشن یا تاریک" class="compact-theme-toggle" id="compactThemeToggleBtn" onclick="toggleTheme()" title="تغییر حالت روشن / تاریک" type="button">
+<svg class="theme-icon-svg" fill="none" id="compactThemeIconSvg" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" aria-hidden="true">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</button>
+<!-- دکمه جستجو -->
+<div class="site-search-box" id="siteSearchBox">
+<input aria-label="جستجو در سایت" autocomplete="off" class="site-search-input" id="siteSearchInput" oninput="performSiteSearch(this.value)" onkeydown="if(event.key === 'Escape') closeSiteSearch();" placeholder="جستجو در سایت..." type="search"/>
+<button class="site-search-button" onclick="toggleSiteSearch()" title="جستجو در سایت" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="7"></circle>
+<line x1="16.5" x2="22" y1="16.5" y2="22"></line>
+</svg>
+</button>
+<div class="site-search-results" id="siteSearchResults">
+</div>
+</div>
+<!-- عنوان وسط -->
+<span class="compact-school-title">
+        مدرسه آموزش از راه دور اترک
+    </span>
+</div>
+</div>
+
+<main aria-label="محتوای اصلی سایت" aria-live="polite" class="main-wrapper" id="mainAppContent">
+</main>
+<!-- فلش شناور بازگشت به ابتدای صفحه -->
+<button aria-label="بازگشت به ابتدای صفحه" class="floating-top-button" id="floatingTopButton" onclick="scrollToPageTop()" title="بازگشت به ابتدای صفحه" type="button">
+<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" aria-hidden="true">
+<path d="M12 19V5"></path>
+<path d="M6 11l6-6 6 6"></path>
+</svg>
+</button>
+<div class="chat-toggle-floating" onclick="toggleChatModal()" title="پشتیبانی آنلاین">
+<svg fill="none" height="26" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="26">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+</svg>
+</div>
+<div class="chat-modal-window" id="chatModal">
+<div class="chat-header-bar">
+<div class="chat-header-shapes">
+<svg style="width:100%;height:100%;" viewbox="0 0 100 100"><polygon fill="#fff" points="10,10 40,20 20,50"></polygon></svg>
+</div>
+<div class="chat-header-info">
+<h4 data-editable="chat-title">پشتیبانی سایت</h4>
+<p data-editable="chat-sub">پاسخگوی سوالات شما هستیم</p>
+</div>
+<button class="chat-close-btn" aria-label="بستن گفت‌وگو" onclick="toggleChatModal()" type="button">✕</button>
+</div>
+<div class="chat-messages-body" id="chatMessages">
+<div class="chat-bg-pattern">
+<span>▲</span><span>■</span><span>●</span><span>▲</span>
+</div>
+<div class="msg-bubble msg-bot">
+                سلام! به مدرسه آموزش از راه دور اترک خوش آمدید. چطور می‌توانم راهنماییتان کنم؟
+            </div>
+</div>
+<div class="chat-input-row">
+<input aria-label="پیام گفت‌وگو" id="chatInput" onkeypress="handleChatEnter(event)" placeholder="پیام خود را بنویسید..." type="text"/>
+<button class="chat-send-btn" aria-label="ارسال پیام" onclick="sendChatMessage()" type="button">➤</button>
+</div>
+</div>
+<footer class="main-footer" aria-label="پاورقی سایت">
+<div class="footer-content">
+<div class="footer-info-col">
+<div class="footer-emblem-container">
+<div class="emblem-badge">
+<svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+<span data-editable="edu-ministry-badge">تحت نظارت رسمی وزارت آموزش و پرورش</span>
+</div>
+</div>
+<div class="footer-address">
+<svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+<span data-editable="footer-address"><strong>آدرس :</strong> بجنورد ، صد متر بالاتر از میدان شهید به سمت هفده شهریور ، سمت راست حاشیه اصلی خیابان ، پنج متر مانده به کوچه جاجرمی ، طبقه دوم</span>
+</div>
+<div style="margin-top:15px; font-weight:600; color:#fbcfe8;">
+<svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    تلفن‌های تماس: ۰۹۹۰۵۱۱۷۰۱۷ - ۰۹۱۵۳۸۵۱۴۱۲
+                </div>
+</div>
+<div class="footer-map-box">
+<iframe title="نقشه موقعیت مدرسه" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3184.2882897489814!2d57.324!3d37.476!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDI4JzMzLjYiTiA1N8KwMTknMjQue4JF!5e0!3m2!1sen!2s!4v1620000000000!5m2!1sen!2s"></iframe>
+</div>
+</div>
+</footer>
+<div class="copyright-bar">
+<svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M15 9.35a4 4 0 1 0 0 5.3"></path></svg>
+<span data-editable="copyright-text">تمامی حقوق این وب سایت متعلق به مدرسه آموزش از راه دور اترک میباشد</span>
+</div>
+<div aria-live="polite" id="studentLmsAccessNotice" role="status">
+<span>اکنون شما میتوانید از بخش سامانه محتوی (LMS) استفاده کنید</span>
+</div>
+<div class="modal-overlay" id="studentLoginModal">
+<div class="modal-box">
+<h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">ورود دانش آموز</h3>
+<p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">نام کاربری، نام خود دانش آموز است.</p>
+<input aria-label="نام کاربری دانش‌آموز" autocomplete="name" id="studentUsernameInput" placeholder="نام کاربری (نام و نام خانوادگی)" type="text"/>
+<input aria-label="رمز عبور دانش‌آموز" autocomplete="current-password" id="studentPasswordInput" inputmode="numeric" placeholder="رمز عبور..." type="password"/>
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+<button class="btn-primary" onclick="loginStudent()" type="button">ورود</button>
+<button class="btn-primary" id="studentLogoutBtn" onclick="logoutStudent()" style="background:#dc2626; display:none;" type="button">خروج از حساب</button>
+<button class="btn-primary" onclick="closeModal('studentLoginModal')" style="background:#6b7280;" type="button">بستن</button>
+</div>
+<div id="studentLoginError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;"></div>
+</div>
+</div>
+<div class="modal-overlay" id="passwordModal">
+<div class="modal-box">
+<h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">ورود به سامانه دریافت جزوات و فیلم‌ها</h3>
+<p style="font-size:13px; color:var(--text-muted);">لطفاً رمز عبور اختصاصی را وارد نمایید:</p>
+<input aria-label="رمز ورود سامانه آموزشی" id="lmsPasscode" inputmode="numeric" placeholder="رمز عبور..." type="password"/>
+<div style="display:flex; gap:10px; justify-content:center;">
+<button class="btn-primary" onclick="verifyLmsPasscode()" type="button">ورود به بخش دانلود</button>
+<button class="btn-primary" onclick="closeModal('passwordModal')" style="background:#6b7280;" type="button">انصراف</button>
+</div>
+<div id="passcodeError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;">رمز عبور نادرست است!</div>
+</div>
+</div>
+<div class="modal-overlay" id="adminLoginModal">
+<div class="modal-box">
+<h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">ورود به پنل مدیریت سایت اترک</h3>
+<p style="font-size:13px; color:var(--text-muted);">ایمیل و رمز عبور حساب مدیر را وارد کنید:</p>
+<input aria-label="ایمیل مدیر سایت" autocomplete="username" id="adminEmailInput" inputmode="email" placeholder="ایمیل مدیر..." type="email"/>
+<input aria-label="رمز عبور مدیر سایت" autocomplete="current-password" id="adminPasswordInput" placeholder="رمز عبور..." type="password"/>
+<div style="display:flex; gap:10px; justify-content:center;">
+<button class="btn-primary" onclick="checkAdminCode()" type="button">تایید و ورود</button>
+<button class="btn-primary" onclick="closeModal('adminLoginModal')" style="background:#6b7280;" type="button">بستن</button>
+</div>
+<div id="adminCodeError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;">کد امنیتی مدیریت نامعتبر است!</div>
+</div>
+</div>
+<!-- Icon Picker Modal with 100 Unique Icons -->
+<div class="modal-overlay" id="iconPickerModal">
+<div class="modal-box" style="width: min(650px, 95vw); max-height: 85vh; display: flex; flex-direction: column;">
+<h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">انتخاب آیکون (کتابخانه ۱۰۰ آیکون متنوع و کاملاً غیرتکراری)</h3>
+<p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">روی هر آیکون کلیک کنید تا برای موضوع یا متن مورد نظر شما اعمال شود:</p>
+<div id="iconGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 10px; overflow-y: auto; max-height: 400px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--card-border);">
+<!-- 100 icons will be populated dynamically -->
+</div>
+<!-- بخش دکمه‌ها که اصلاح شد -->
+<div style="display:flex; justify-content:center; gap: 12px; margin-top: 15px;">
+<button id="deleteIconButton" style="background-color: #ff4d4d; color: white; padding: 8px 20px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; font-size: 14px;" type="button">
+                حذف این آیکون
+            </button>
+<button class="btn-primary" onclick="closeModal('iconPickerModal')" style="background:#6b7280; padding: 8px 20px;" type="button">
+                انصراف / بستن
+            </button>
+</div>
+</div>
+</div>
+<input accept="image/*,video/*" aria-label="انتخاب تصویر برای بارگذاری" class="hidden-file-input" id="globalImageUploader" type="file"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+<script src="js/main.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/news.js"></script>
+<script src="js/fixes.js"></script>
+<script src="js/comments.js"></script>
+<!-- =========================================================
+     پس‌زمینه آموزشی SVG سایت
+     ========================================================= -->
+<div class="education-bg" aria-hidden="true">
+
+    <!-- کتاب -->
+    <svg class="edu-shape edu-book" viewBox="0 0 100 100">
+        <path d="M18 25 C30 18 42 20 50 28 V78 C40 70 29 69 18 75 Z"/>
+        <path d="M82 25 C70 18 58 20 50 28 V78 C60 70 71 69 82 75 Z"/>
+        <path d="M50 28 V78"/>
+        <path d="M25 32 C32 29 39 30 44 34"/>
+        <path d="M75 32 C68 29 61 30 56 34"/>
+    </svg>
+
+
+    <!-- مداد -->
+    <svg class="edu-shape edu-pencil" viewBox="0 0 100 100">
+        <path d="M23 72 L68 27 L80 39 L35 84 Z"/>
+        <path d="M68 27 L76 19 L88 31 L80 39"/>
+        <path d="M23 72 L17 88 L35 84"/>
+        <path d="M29 66 L41 78"/>
+    </svg>
+
+<!-- میکروسکوپ -->
+<svg class="edu-shape edu-microscope" viewBox="0 0 100 100">
+    <path d="M35 20 L52 20 L63 43"/>
+    <path d="M52 20 L47 13 L40 18"/>
+    <path d="M63 43 C70 48 73 57 70 65"/>
+    <path d="M70 65 H38"/>
+    <path d="M38 65 C30 65 25 71 25 78"/>
+    <path d="M25 78 H78"/>
+    <path d="M47 43 H65"/>
+    <path d="M43 43 C37 49 35 56 38 62"/>
+    <circle cx="54" cy="43" r="4"/>
+    <path d="M32 78 C38 70 50 68 61 72"/>
+</svg>
+
+    <!-- مولکول -->
+    <svg class="edu-shape edu-atom" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="50" rx="38" ry="16"/>
+        <ellipse cx="50" cy="50" rx="38" ry="16"
+                 transform="rotate(60 50 50)"/>
+        <ellipse cx="50" cy="50" rx="38" ry="16"
+                 transform="rotate(-60 50 50)"/>
+        <circle cx="50" cy="50" r="7"/>
+        <circle cx="84" cy="50" r="3"/>
+        <circle cx="33" cy="22" r="3"/>
+        <circle cx="33" cy="78" r="3"/>
+    </svg>
+
+
+    <!-- لامپ ایده -->
+    <svg class="edu-shape edu-bulb" viewBox="0 0 100 100">
+        <path d="M34 57 C22 48 24 28 38 21 C52 13 71 21 76 36 C80 48 73 57 66 63 C62 66 61 70 61 75 H39 C39 69 38 65 34 62 Z"/>
+        <path d="M39 82 H61"/>
+        <path d="M43 89 H57"/>
+        <path d="M50 4 V12"/>
+        <path d="M16 20 L22 26"/>
+        <path d="M84 20 L78 26"/>
+    </svg>
+
+
+    <!-- خط کش -->
+    <svg class="edu-shape edu-ruler" viewBox="0 0 100 100">
+        <rect x="17" y="34" width="66" height="32" rx="5"/>
+        <path d="M29 34 V48"/>
+        <path d="M39 34 V43"/>
+        <path d="M49 34 V48"/>
+        <path d="M59 34 V43"/>
+        <path d="M69 34 V48"/>
+        <path d="M79 34 V43"/>
+    </svg>
+
+
+    <!-- نمودار -->
+    <svg class="edu-shape edu-chart" viewBox="0 0 100 100">
+        <path d="M20 80 V20"/>
+        <path d="M20 80 H85"/>
+        <rect x="31" y="57" width="10" height="23" rx="2"/>
+        <rect x="48" y="43" width="10" height="37" rx="2"/>
+        <rect x="65" y="29" width="10" height="51" rx="2"/>
+        <path d="M29 50 L53 34 L70 24 L82 15"/>
+        <circle cx="29" cy="50" r="2.5"/>
+        <circle cx="53" cy="34" r="2.5"/>
+        <circle cx="70" cy="24" r="2.5"/>
+        <circle cx="82" cy="15" r="2.5"/>
+    </svg>
+
+
+    <!-- نماد ریاضی -->
+    <svg class="edu-shape edu-math" viewBox="0 0 100 100">
+        <path d="M25 30 H75"/>
+        <path d="M50 18 V42"/>
+        <path d="M25 70 H75"/>
+        <path d="M38 58 L62 82"/>
+        <path d="M62 58 L38 82"/>
+    </svg>
+
+
+    <!-- ستاره‌ها -->
+    <svg class="edu-shape edu-stars" viewBox="0 0 120 100">
+        <path d="M25 15 L28 24 L38 24 L30 30 L33 40 L25 34 L17 40 L20 30 L12 24 L22 24 Z"/>
+        <path d="M72 35 L76 47 L89 47 L79 55 L83 68 L72 60 L61 68 L65 55 L55 47 L68 47 Z"/>
+        <path d="M96 12 L99 20 L108 20 L101 26 L104 35 L96 30 L88 35 L91 26 L84 20 L93 20 Z"/>
+    </svg>
+
+
+    <!-- ذره‌های تزئینی -->
+    <svg class="edu-shape edu-dots" viewBox="0 0 100 100">
+        <circle cx="25" cy="25" r="4"/>
+        <circle cx="50" cy="50" r="7"/>
+        <circle cx="75" cy="30" r="3"/>
+        <circle cx="72" cy="75" r="5"/>
+        <circle cx="28" cy="72" r="2.5"/>
+    </svg>
+
+</div>
+</body>
+</html>
