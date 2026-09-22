@@ -212,6 +212,12 @@ headers: {
                 if (typeof data.comments_v39 === 'string') {
                     localStorage.setItem('atrak_comments_v39', data.comments_v39);
                 }
+             if (typeof data.honors === 'string') {
+    localStorage.setItem(
+        'atrak_honors_v1',
+        data.honors
+    );
+}
 
                 if (typeof data.iconColor === 'string') {
                     localStorage.setItem('atrak_icon_color', data.iconColor);
