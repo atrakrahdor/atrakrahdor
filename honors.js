@@ -306,3 +306,60 @@ async function deleteAtrakHonor(index) {
         'atrakHonorsHomeGrid'
     );
 }
+/* =========================================================
+   اجرای افتخارات بعد از آماده شدن کامل سایت
+   ========================================================= */
+
+function refreshAtrakHonors() {
+
+    if (
+        document.getElementById(
+            'atrakHonorsHomeGrid'
+        )
+    ) {
+        renderAtrakHonors(
+            'atrakHonorsHomeGrid'
+        );
+    }
+
+
+    if (
+        document.getElementById(
+            'atrakHonorsPageGrid'
+        )
+    ) {
+        renderAtrakHonors(
+            'atrakHonorsPageGrid'
+        );
+    }
+
+
+    const adminBox =
+        document.getElementById(
+            'atrakHonorsAdminBox'
+        );
+
+    if (adminBox) {
+
+        adminBox.style.display =
+            (
+                typeof state !== 'undefined' &&
+                state.isAdmin
+            )
+            ? 'flex'
+            : 'none';
+    }
+}
+
+
+window.addEventListener(
+    'load',
+    function () {
+
+        setTimeout(
+            refreshAtrakHonors,
+            300
+        );
+
+    }
+);
