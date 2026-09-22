@@ -3060,6 +3060,33 @@ document.addEventListener(
 
         </section>
     `,
+         honors: `
+<section class="atrak-honors-page">
+
+    <div class="atrak-honors-page-header">
+        <h1>افتخارآفرینان مدرسه آموزش از راه دور اترک</h1>
+        <p>دانش‌آموزان افتخارآفرین مدرسه اترک</p>
+    </div>
+
+    <div class="atrak-honors-admin-box" id="atrakHonorsAdminBox">
+        <button
+            type="button"
+            class="atrak-honors-add-btn"
+            onclick="openAtrakHonorAdmin()"
+            style="display:none;"
+            id="atrakHonorsAddButton"
+        >
+            افزودن افتخارآفرین
+        </button>
+    </div>
+
+    <div
+        id="atrakHonorsPageGrid"
+        class="atrak-honors-grid"
+    ></div>
+
+</section>
+`,
     home: `
 
         <section class="glass-card fade-in-up">
@@ -6725,7 +6752,13 @@ if (
     
 
 }
+const honorsAddButton =
+    document.getElementById('atrakHonorsAddButton');
 
+if (honorsAddButton) {
+    honorsAddButton.style.display =
+        state.isAdmin ? 'inline-block' : 'none';
+}
 function restoreIcons() {
     const savedIcons = localStorage.getItem('atrak_saved_icons');
     let icons = {};
