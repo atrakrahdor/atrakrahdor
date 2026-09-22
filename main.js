@@ -1852,22 +1852,30 @@ document.addEventListener(
     }
 );
         const views = {
-         'honors': `
+        'honors': `
+
 <section class="atrak-honors-page">
 
-    <div class="atrak-honors-page-header">
-        <h1>افتخارآفرینان مدرسه آموزش از راه دور اترک</h1>
-        <p>دانش‌آموزان افتخارآفرین مدرسه اترک</p>
+    <div class="atrak-honors-page-title">
+        <h1>
+            افتخارآفرینان مدرسه آموزش از راه دور اترک
+        </h1>
+
+        <p>
+            دانش‌آموزان موفق و افتخارآفرین مدرسه اترک
+        </p>
     </div>
 
-    <div class="atrak-honors-admin-area" id="atrakHonorsAdminArea">
+    <div
+        id="atrakHonorsAdminBox"
+        class="atrak-honors-admin"
+        style="display:none;"
+    >
         <button
             type="button"
-            id="atrakHonorsAddButton"
-            class="atrak-honors-add-btn"
             onclick="openAtrakHonorAdmin()"
         >
-            + افزودن افتخارآفرین
+            ＋ افزودن دانش‌آموز
         </button>
     </div>
 
@@ -1877,6 +1885,8 @@ document.addEventListener(
     ></div>
 
 </section>
+
+`,
 `,
     'online-school': `
         <section class="glass-card fade-in-up online-school-page">
