@@ -29,8 +29,9 @@ let cloudSyncQueue = Promise.resolve();
                     theme: localStorage.getItem('atrak_theme') || 'light',
                     news: localStorage.getItem(ATRAK_NEWS_STORAGE_KEY) || '[]',
                     components: localStorage.getItem('atrak_dynamic_elements_v1') || '[]',
-                    comments_v39: localStorage.getItem('atrak_comments_v39') || '[]',
-                    updatedAt: updatedAt
+comments_v39: localStorage.getItem('atrak_comments_v39') || '[]',
+honors: localStorage.getItem('atrak_honors_v1') || '[]',
+updatedAt: updatedAt
                 };
 
                 const response = await fetch(
