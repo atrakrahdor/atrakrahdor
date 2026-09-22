@@ -8854,7 +8854,10 @@ html:not(.dark) .edu-shape {
     text-align: center;
     color: var(--text-muted);
     font-size: 13px;
-    padding: 20px;
+    padding: 8px 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 
@@ -8981,4 +8984,60 @@ html:not(.dark) .edu-shape {
         font-size: 18px;
     }
 
+}
+.atrak-honors-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 25px 15px;
+}
+
+.atrak-honors-page-header {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.atrak-honors-page-header h1 {
+    margin: 0 0 7px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.atrak-honors-page-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #777;
+}
+
+.atrak-honors-admin-area {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.atrak-honors-add-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 16px;
+    background: #111827;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity .2s ease;
+}
+
+.atrak-honors-add-btn:hover {
+    opacity: .85;
+}
+.atrak-honors-empty {
+    text-align: center;
+    padding: 10px 0;
+    margin: 10px 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #777;
+    font-size: 13px;
 }
