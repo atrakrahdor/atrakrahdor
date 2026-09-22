@@ -3459,6 +3459,36 @@ document.addEventListener(
         class="atrak-banner-image"
      decoding="async" loading="lazy">
 </div>
+<!-- =========================================================
+     افتخارآفرینان مدرسه اترک
+     ========================================================= -->
+
+<section class="atrak-honors-home">
+
+    <div class="atrak-honors-title">
+
+        <h2>
+            افتخارآفرینان مدرسه آموزش از راه دور اترک
+        </h2>
+
+    </div>
+
+
+    <div
+        id="atrakHonorsHomeGrid"
+        class="atrak-honors-grid atrak-honors-home-grid"
+    ></div>
+
+
+    <button
+        type="button"
+        class="atrak-honors-more-btn"
+        onclick="navigateTo('honors')"
+    >
+        برای دیدن افتخارآفرینان مدرسه آموزش از راه دور اترک کلیک کنید
+    </button>
+
+</section>
         <div class="services-header fade-in-up">
             <div class="diamonds-group diamonds-left">
                 <span class="diamond small"></span>
