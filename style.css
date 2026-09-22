@@ -8636,3 +8636,349 @@ html:not(.dark) .edu-shape {
 @media(max-width:650px){#atrak-comments-root .atrak-comments-card{padding:17px}#atrak-comments-root .atrak-comment-submit{width:100%;justify-self:stretch}}
 
 #atrak-comments-root .atrak-comment-status{margin-top:10px;padding:8px 10px;border-radius:9px;background:rgba(34,197,94,.08);color:#166534;font-size:13px;font-weight:700}#atrak-comments-root .atrak-comment-status.error{background:rgba(239,68,68,.08);color:#b91c1c}
+/* =========================================================
+   افتخارآفرینان مدرسه اترک
+   ========================================================= */
+
+.atrak-honors-home {
+    width: 100%;
+    margin: 24px 0 28px;
+    padding: 22px 16px;
+    text-align: center;
+}
+
+.atrak-honors-title h2,
+.atrak-honors-page-header h1 {
+    margin: 0;
+    color: var(--primary-purple);
+    font-size: 22px;
+    font-weight: 900;
+}
+
+
+/* شبکه چهار نفر اول */
+
+.atrak-honors-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 22px;
+}
+
+
+/* کارت */
+
+.atrak-honor-card {
+    position: relative;
+    text-align: center;
+    padding: 8px 8px 14px;
+    border-radius: 18px;
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+
+/* دایره عکس */
+
+.atrak-honor-photo-wrap {
+    width: 135px;
+    height: 135px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    padding: 4px;
+    background: transparent;
+    transition:
+        box-shadow .25s ease,
+        transform .25s ease;
+}
+
+
+.atrak-honor-photo {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(236, 72, 153, .20);
+}
+
+
+/* نام */
+
+.atrak-honor-name {
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.8;
+    transition:
+        color .25s ease,
+        text-shadow .25s ease;
+}
+
+
+/* دانشگاه */
+
+.atrak-honor-university {
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.8;
+    transition:
+        color .25s ease,
+        text-shadow .25s ease;
+}
+
+
+/* افکت هاور */
+
+.atrak-honor-card:hover {
+    transform: translateY(-4px);
+}
+
+
+.atrak-honor-card:hover .atrak-honor-photo-wrap {
+    transform: scale(1.03);
+    box-shadow:
+        0 0 0 5px rgba(236, 72, 153, .10),
+        0 8px 22px rgba(236, 72, 153, .22);
+}
+
+
+.atrak-honor-card:hover .atrak-honor-name,
+.atrak-honor-card:hover .atrak-honor-university {
+    color: #ec167f;
+    text-shadow:
+        0 0 10px rgba(236, 72, 153, .22);
+}
+
+
+/* لینک مشاهده همه */
+
+.atrak-honors-more-btn {
+    margin-top: 22px;
+    border: none;
+    background: transparent;
+    color: #db2777;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 7px 12px;
+    border-radius: 10px;
+    transition:
+        color .2s ease,
+        background .2s ease;
+}
+
+
+.atrak-honors-more-btn:hover {
+    color: #be185d;
+    background: rgba(236, 72, 153, .07);
+}
+
+
+/* صفحه کامل */
+
+.atrak-honors-page {
+    width: 100%;
+    padding: 20px 0 35px;
+}
+
+
+.atrak-honors-page-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+
+.atrak-honors-page-header p {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* دکمه مدیریت */
+
+.atrak-honors-admin-box {
+    display: flex;
+    justify-content: center;
+    margin: 18px 0 24px;
+}
+
+
+.atrak-honors-add-btn,
+.atrak-honors-save-btn {
+    border: none;
+    border-radius: 11px;
+    background: #ec4899;
+    color: #fff;
+    font-family: inherit;
+    font-weight: 800;
+    padding: 10px 18px;
+    cursor: pointer;
+    box-shadow: 0 7px 18px rgba(236, 72, 153, .18);
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+
+.atrak-honors-add-btn:hover,
+.atrak-honors-save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 22px rgba(236, 72, 153, .25);
+}
+
+
+/* حذف */
+
+.atrak-honor-delete {
+    margin-top: 9px;
+    border: none;
+    background: transparent;
+    color: #ef4444;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+
+/* حالت خالی */
+
+.atrak-honors-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 20px;
+}
+
+
+/* پنجره مدیریت */
+
+.atrak-honor-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(20, 5, 24, .45);
+    backdrop-filter: blur(6px);
+}
+
+
+.atrak-honor-modal {
+    width: min(480px, 96vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.20);
+    position: relative;
+}
+
+
+.atrak-honor-modal h2 {
+    margin: 0 0 18px;
+    text-align: center;
+    color: var(--primary-purple);
+}
+
+
+.atrak-honor-modal-close {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    border: none;
+    background: transparent;
+    font-size: 25px;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+
+.atrak-honor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+
+.atrak-honor-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.atrak-honor-form input {
+    width: 100%;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 11px;
+    background: rgba(255,255,255,.75);
+    color: #222;
+    font-family: inherit;
+    outline: none;
+}
+
+
+[data-theme="dark"] .atrak-honor-form input {
+    background: rgba(30,10,35,.7);
+    color: #fff;
+}
+
+
+/* موبایل */
+
+@media (max-width: 800px) {
+
+    .atrak-honors-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .atrak-honors-home {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .atrak-honors-grid {
+        gap: 12px;
+    }
+
+    .atrak-honor-photo-wrap {
+        width: 105px;
+        height: 105px;
+    }
+
+    .atrak-honor-name {
+        font-size: 13px;
+    }
+
+    .atrak-honor-university {
+        font-size: 11px;
+    }
+
+    .atrak-honors-title h2,
+    .atrak-honors-page-header h1 {
+        font-size: 18px;
+    }
+
+}
