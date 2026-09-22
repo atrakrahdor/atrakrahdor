@@ -39,16 +39,16 @@ function renderAtrakHonors(containerId) {
     const students =
         getAtrakHonors();
 
-    if (!students.length) {
+   if (!students.length) {
 
-        container.innerHTML = `
-            <div class="atrak-honors-empty">
-                هنوز دانش‌آموزی ثبت نشده است.
-            </div>
-        `;
+    container.innerHTML = `
+        <div class="atrak-honors-empty">
+            هنوز افتخارآفرینی ثبت نشده است.
+        </div>
+    `;
 
-        return;
-    }
+    return;
+}
 
 
     container.innerHTML =
