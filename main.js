@@ -3454,7 +3454,7 @@ document.addEventListener(
 <!-- بنر چرا اترک -->
 <div class="atrak-banner-wrapper">
     <img
-        src="wide_horizontal_colorful_promotional_banner_image.png"
+        src="wide_horizontal_colorful_promotional_banner_image.PNG"
         alt="چرا اترک؟"
         class="atrak-banner-image"
      decoding="async" loading="lazy">
