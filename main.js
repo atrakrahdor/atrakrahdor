@@ -1852,41 +1852,7 @@ document.addEventListener(
     }
 );
         const views = {
-        'honors': `
-
-<section class="atrak-honors-page">
-
-    <div class="atrak-honors-page-title">
-        <h1>
-            افتخارآفرینان مدرسه آموزش از راه دور اترک
-        </h1>
-
-        <p>
-            دانش‌آموزان موفق و افتخارآفرین مدرسه اترک
-        </p>
-    </div>
-
-    <div
-        id="atrakHonorsAdminBox"
-        class="atrak-honors-admin"
-        style="display:none;"
-    >
-        <button
-            type="button"
-            onclick="openAtrakHonorAdmin()"
-        >
-            ＋ افزودن دانش‌آموز
-        </button>
-    </div>
-
-    <div
-        id="atrakHonorsPageGrid"
-        class="atrak-honors-grid"
-    ></div>
-
-</section>
-
-`,
+      
 `,
     'online-school': `
         <section class="glass-card fade-in-up online-school-page">
