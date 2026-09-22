@@ -6699,9 +6699,30 @@ if (
 
 }
 
-        renderAtrakDynamicElements();
+        renderAtrakDynamicElements()
+     if (
+    document.getElementById(
+        'atrakHonorsHomeGrid'
+    )
+) {
+    renderAtrakHonors(
+        'atrakHonorsHomeGrid'
+    );
+}
+
+
+if (
+    document.getElementById(
+        'atrakHonorsPageGrid'
+    )
+) {
+    renderAtrakHonors(
+        'atrakHonorsPageGrid'
+    );
+}
 
     }, 100);
+    
 
 }
 
