@@ -9126,12 +9126,28 @@ html:not(.dark) .edu-shape {
 }
 
 
-/* جلوگیری از درخواست تصویر پس‌زمینه‌ای که در بسته پروژه وجود ندارد */
-html, body { background-image: none !important; }
+#atrak-honors {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
 .atrak-test-honor-card {
     min-height: 180px;
     border: 1px solid #ddd;
     border-radius: 12px;
     background: #fff;
     box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+    #atrak-honors {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    #atrak-honors {
+        grid-template-columns: 1fr;
+    }
 }
