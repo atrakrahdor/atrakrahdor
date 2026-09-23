@@ -1853,7 +1853,6 @@ document.addEventListener(
 );
         const views = {
       
-`,
     'online-school': `
         <section class="glass-card fade-in-up online-school-page">
 
