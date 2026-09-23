@@ -9151,3 +9151,53 @@ html:not(.dark) .edu-shape {
         grid-template-columns: 1fr;
     }
 }
+
+/* اصلاحات نهایی افتخارآفرینان و مدیریت */
+.atrak-honors-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px;
+    align-items: start;
+}
+
+.atrak-honor-placeholder {
+    min-height: 290px;
+    padding: 20px 12px 24px;
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    background: var(--card-bg);
+    box-shadow: var(--glass-shadow);
+}
+
+.atrak-honor-placeholder-photo {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: rgba(236,72,153,.08);
+    border: 2px dashed rgba(236,72,153,.28);
+    font-size: 52px;
+}
+
+body.admin-mode #mainAppContent {
+    padding-top: 82px;
+}
+
+.atrak-news-admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200001;
+}
+
+@media (max-width: 900px) {
+    .atrak-honors-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 520px) {
+    .atrak-honors-grid { grid-template-columns: 1fr; }
+    .atrak-honor-placeholder { min-height: 260px; }
+}
