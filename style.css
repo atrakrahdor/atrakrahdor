@@ -9128,3 +9128,10 @@ html:not(.dark) .edu-shape {
 
 /* جلوگیری از درخواست تصویر پس‌زمینه‌ای که در بسته پروژه وجود ندارد */
 html, body { background-image: none !important; }
+.atrak-test-honor-card {
+    min-height: 180px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: #fff;
+    box-sizing: border-box;
+}
