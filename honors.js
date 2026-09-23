@@ -42,9 +42,12 @@ function renderAtrakHonors(containerId) {
    if (!students.length) {
 
     container.innerHTML = `
-        <div class="atrak-honors-empty">
-            هنوز افتخارآفرینی ثبت نشده است.
-        </div>
+      <div id="atrak-honors">
+    <div class="atrak-test-honor-card"></div>
+    <div class="atrak-test-honor-card"></div>
+    <div class="atrak-test-honor-card"></div>
+    <div class="atrak-test-honor-card"></div>
+</div>
     `;
 
     return;
