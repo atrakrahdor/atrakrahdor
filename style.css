@@ -9041,3 +9041,90 @@ html:not(.dark) .edu-shape {
     color: #777;
     font-size: 13px;
 }
+
+/* =========================================================
+   استایل مینیمال نهایی افتخارآفرینان
+   ========================================================= */
+
+.atrak-honors-page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 36px;
+    text-align: center;
+}
+
+.atrak-honors-page-header {
+    margin-bottom: 18px;
+}
+
+.atrak-honors-page-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.atrak-honors-page-header p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.atrak-honors-admin-box {
+    display: none;
+    justify-content: center;
+    margin: 14px 0 22px;
+}
+
+.atrak-honors-add-btn {
+    border: 0;
+    border-radius: 8px;
+    background: #ec4899;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 15px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: opacity .2s ease;
+}
+
+.atrak-honors-add-btn:hover {
+    transform: none;
+    box-shadow: none;
+    opacity: .88;
+}
+
+.atrak-honors-grid {
+    margin-top: 18px;
+    gap: 22px;
+}
+
+.atrak-honor-card {
+    padding: 6px 6px 12px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.atrak-honor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: none;
+    background: transparent;
+}
+
+.atrak-honors-empty {
+    grid-column: 1 / -1;
+    margin: 10px 0;
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* جلوگیری از درخواست تصویر پس‌زمینه‌ای که در بسته پروژه وجود ندارد */
+html, body { background-image: none !important; }
