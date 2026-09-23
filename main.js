@@ -1852,7 +1852,32 @@ document.addEventListener(
     }
 );
         const views = {
+    'honors': `
+        <section class="atrak-honors-page">
+            <div class="atrak-honors-page-header">
+                <h1>افتخارآفرینان مدرسه آموزش از راه دور اترک</h1>
+                <p>دانش‌آموزان افتخارآفرین مدرسه اترک</p>
+            </div>
+
+            <div class="atrak-honors-admin-box" id="atrakHonorsAdminBox">
+                <button
+                    type="button"
+                    class="atrak-honors-add-btn"
+                    onclick="openAtrakHonorAdmin()"
+                >
+                    + افزودن افتخارآفرین
+                </button>
+            </div>
+
+            <div
+                id="atrakHonorsPageGrid"
+                class="atrak-honors-grid"
+            ></div>
+        </section>
+    `,
+
       
+
     'online-school': `
         <section class="glass-card fade-in-up online-school-page">
 
@@ -6748,25 +6773,9 @@ if (
         'atrakHonorsPageGrid'
     );
 }
-const honorsAddButton =
-    document.getElementById(
-        'atrakHonorsAddButton'
-    );
-
-if (honorsAddButton) {
-    honorsAddButton.style.display =
-        state.isAdmin ? 'inline-flex' : 'none';
-}
     }, 100);
     
 
-}
-const honorsAddButton =
-    document.getElementById('atrakHonorsAddButton');
-
-if (honorsAddButton) {
-    honorsAddButton.style.display =
-        state.isAdmin ? 'inline-block' : 'none';
 }
 function restoreIcons() {
     const savedIcons = localStorage.getItem('atrak_saved_icons');
@@ -9087,12 +9096,38 @@ window.addEventListener('storage', function (event) {
                 });
                 const user = response.ok ? await response.json() : null;
                 if (!user?.id) throw new Error('session');
-                const adminResponse = await fetch(
-                    SUPABASE_URL + '/rest/v1/admins?id=eq.' + encodeURIComponent(user.id) + '&select=id&limit=1',
-                    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + token } }
+                const adminHeaders = {
+                    apikey: SUPABASE_ANON_KEY,
+                    Authorization: 'Bearer ' + token
+                };
+
+                let adminResponse = await fetch(
+                    SUPABASE_URL + '/rest/v1/admins?user_id=eq.' +
+                    encodeURIComponent(user.id) +
+                    '&select=id&limit=1',
+                    { headers: adminHeaders }
                 );
-                const rows = adminResponse.ok ? await adminResponse.json() : [];
-                if (!Array.isArray(rows) || rows.length !== 1) throw new Error('admin');
+
+                let rows = adminResponse.ok
+                    ? await adminResponse.json()
+                    : [];
+
+                if (!adminResponse.ok) {
+                    adminResponse = await fetch(
+                        SUPABASE_URL + '/rest/v1/admins?id=eq.' +
+                        encodeURIComponent(user.id) +
+                        '&select=id&limit=1',
+                        { headers: adminHeaders }
+                    );
+
+                    rows = adminResponse.ok
+                        ? await adminResponse.json()
+                        : [];
+                }
+
+                if (!Array.isArray(rows) || rows.length !== 1) {
+                    throw new Error('admin');
+                }
                 atrakAdminAccessToken = token;
                 toggleAdmin(true);
             } catch (e) {
@@ -9146,6 +9181,10 @@ function restoreDynamicPositionsAfterAdminToggle() {
     // هر دو متغیر باید با هم هماهنگ باشند
     state.isAdmin = status;
     isAdminMode = status;
+
+    if (typeof refreshAtrakHonors === 'function') {
+        refreshAtrakHonors();
+    }
 
     if (status) {
 
