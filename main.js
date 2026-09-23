@@ -1580,7 +1580,12 @@ function saveAtrakNewsFromAdmin() {
     }
 
 
-    saveAtrakNews(news);
+    const saved = saveAtrakNews(news);
+
+    if (!saved) {
+        alert('ذخیره خبر انجام نشد. احتمالاً حجم تصویر انتخاب‌شده زیاد است.');
+        return;
+    }
 
     renderAtrakNews();
 
@@ -3099,7 +3104,6 @@ document.addEventListener(
             type="button"
             class="atrak-honors-add-btn"
             onclick="openAtrakHonorAdmin()"
-            style="display:none;"
             id="atrakHonorsAddButton"
         >
             افزودن افتخارآفرین
