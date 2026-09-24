@@ -10498,29 +10498,66 @@ function logoutStudent() {
             if (e.key === 'Enter') sendChatMessage();
         }
 
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if (!text) return;
+// تنظیمات بازوی بله مدرسه اترک
+const BALE_BOT_TOKEN = "1217256057:d_n9HdPE77NFRh-KdK3bCk0e1EMcbxZwMLM";
+const BALE_CHAT_ID = "147638651";
 
-            const body = document.getElementById('chatMessages');
-            const userBubble = document.createElement('div');
-            userBubble.className = 'msg-bubble msg-user';
-            userBubble.innerText = text;
-            body.appendChild(userBubble);
+// ساخت شناسه یکتا برای مرورگر کاربر
+if (!localStorage.getItem('chat_session_id')) {
+    localStorage.setItem('chat_session_id', 'user_' + Math.floor(1000 + Math.random() * 9000));
+}
+const currentSessionId = localStorage.getItem('chat_session_id');
 
-            input.value = '';
-            body.scrollTop = body.scrollHeight;
+async function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const messageText = chatInput ? chatInput.value.trim() : '';
 
-            setTimeout(() => {
-                const botBubble = document.createElement('div');
-                botBubble.className = 'msg-bubble msg-bot';
-                botBubble.innerText = 'پیام شما دریافت شد. کارشناسان ما به زودی با شما تماس خواهند گرفت. جهت مشاوره فوری با شماره ۰۹۹۰۵۱۱۷۰۱۷ تماس بگیرید.';
-                body.appendChild(botBubble);
-                body.scrollTop = body.scrollHeight;
-            }, 1000);
+    if (!messageText) return;
+
+    // ۱. نمایش پیام کاربر در چت سایت
+    appendChatMessage(messageText, 'msg-user');
+    chatInput.value = '';
+
+    // ۲. ساخت متن پیام برای ارسال به بله
+    const fullMessage = `📩 پیام جدید از سایت اترک\n👤 کد کاربر: ${currentSessionId}\n💬 متن: ${messageText}`;
+
+    // ۳. ارسال پیام از طریق پروکسی معتبر (برای حل مشکل CORS مرورگر)
+    const baleApiUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
+    const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(baleApiUrl);
+
+    try {
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: BALE_CHAT_ID,
+                text: fullMessage
+            })
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+            console.log('پیام با موفقیت به بازوی بله ارسال شد.');
+        } else {
+            console.error('خطای بله:', data);
         }
+    } catch (error) {
+        console.error('خطا در ارتباط:', error);
+    }
+}
 
+function appendChatMessage(text, typeClass) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg-bubble ${typeClass}`;
+    msgDiv.textContent = text;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
         function toggleFaq(faqItem) {
             faqItem.classList.toggle('open');
         }
