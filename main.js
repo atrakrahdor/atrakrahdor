@@ -513,43 +513,28 @@ function getAtrakNews() {
 }
 
 
-function saveAtrakNews(news) {
-
+async function saveAtrakNews(news) {
     try {
+        if (!Array.isArray(news)) {
+            console.error('داده اخبار معتبر نیست.');
+            return false;
+        }
 
         localStorage.setItem(
             ATRAK_NEWS_STORAGE_KEY,
-            JSON.stringify(
-                Array.isArray(news)
-                    ? news
-                    : []
-            )
+            JSON.stringify(news)
         );
 
-        /*
-         * ارسال خبرها به فضای ابری
-         * تا بعداً همه کاربران همان اطلاعات را ببینند.
-         */
-        if (
-            typeof syncStateToCloud ===
-            'function'
-        ) {
-            syncStateToCloud();
+        if (typeof syncStateToCloud === 'function') {
+            await syncStateToCloud();
         }
 
         return true;
-
     } catch (error) {
-
-        console.error(
-            'خطا در ذخیره اخبار:',
-            error
-        );
-
+        console.error('خطا در ذخیره اخبار:', error);
         return false;
     }
 }
-
 
 function escapeAtrakNewsHTML(value) {
 
@@ -1468,7 +1453,7 @@ function renderAtrakNewsAdminList() {
 }
 
 
-function saveAtrakNewsFromAdmin() {
+async function saveAtrakNewsFromAdmin() {
 
     const title =
         document.getElementById(
@@ -1580,7 +1565,7 @@ function saveAtrakNewsFromAdmin() {
     }
 
 
-    const saved = saveAtrakNews(news);
+const saved = await saveAtrakNews(news);
 
     if (!saved) {
         alert('ذخیره خبر انجام نشد. احتمالاً حجم تصویر انتخاب‌شده زیاد است.');
