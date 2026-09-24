@@ -10502,13 +10502,11 @@ function logoutStudent() {
 const BALE_BOT_TOKEN = "1217256057:d_n9HdPE77NFRh-KdK3bCk0e1EMcbxZwMLM";
 const BALE_CHAT_ID = "147638651";
 
-// شناسه جلسه کاربر
 if (!localStorage.getItem('chat_session_id')) {
     localStorage.setItem('chat_session_id', 'user_' + Math.floor(1000 + Math.random() * 9000));
 }
 const currentSessionId = localStorage.getItem('chat_session_id');
 
-// کلید Enter برای ارسال پیام
 function handleChatEnter(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
@@ -10516,38 +10514,45 @@ function handleChatEnter(event) {
     }
 }
 
-// تابع اصلی ارسال پیام (جایگزین async function sendChatMessage قبلی شود)
 async function sendChatMessage() {
     const chatInput = document.getElementById('chatInput');
     const messageText = chatInput ? chatInput.value.trim() : '';
 
     if (!messageText) return;
 
-    // ۱. نمایش پیام کاربر در چت سایت
+    // ۱. نمایش پیام در چت سایت
     appendChatMessage(messageText, 'msg-user');
     chatInput.value = '';
 
-    // ۲. ساخت متن پیام
-    const fullMessage = `📩 پیام جدید از سایت اترک\n👤 کد کاربر: ${currentSessionId}\n💬 متن: ${messageText}`;
+    // ۲. متن پیام
+    const fullMessage = `📩 پیام جدید از سایت اترک\n👤 کاربر: ${currentSessionId}\n💬 متن: ${messageText}`;
 
-    // ۳. ارسال مستقیم با AllOrigins بدون مشکل ۴۰۳
-    const baleUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage?chat_id=${BALE_CHAT_ID}&text=${encodeURIComponent(fullMessage)}`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(baleUrl)}`;
+    // ۳. ارسال به سرویس پروکسی معتبر ThingProxy با متد POST
+    const targetUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
+    const proxyUrl = `https://thingproxy.freeboard.io/fetch/${targetUrl}`;
 
     try {
-        const response = await fetch(proxyUrl);
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: BALE_CHAT_ID,
+                text: fullMessage
+            })
+        });
 
         if (response.ok) {
             console.log('✅ پیام با موفقیت به بله ارسال شد.');
         } else {
-            console.error('❌ خطای پاسخ بله:', response.status);
+            console.error('❌ خطا در ارسال به بله:', response.status);
         }
     } catch (error) {
-        console.error('❌ خطا در ارتباط:', error);
+        console.error('❌ خطا در ارتباط شبکه:', error);
     }
 }
 
-// تابع اضافه کردن پیام به صفحه چت
 function appendChatMessage(text, typeClass) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
