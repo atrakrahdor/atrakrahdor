@@ -10502,12 +10502,21 @@ function logoutStudent() {
 const BALE_BOT_TOKEN = "1217256057:d_n9HdPE77NFRh-KdK3bCk0e1EMcbxZwMLM";
 const BALE_CHAT_ID = "147638651";
 
-// ساخت شناسه یکتا برای مرورگر کاربر
+// شناسه جلسه کاربر
 if (!localStorage.getItem('chat_session_id')) {
     localStorage.setItem('chat_session_id', 'user_' + Math.floor(1000 + Math.random() * 9000));
 }
 const currentSessionId = localStorage.getItem('chat_session_id');
 
+// کلید Enter برای ارسال پیام
+function handleChatEnter(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendChatMessage();
+    }
+}
+
+// تابع اصلی ارسال پیام (جایگزین async function sendChatMessage قبلی شود)
 async function sendChatMessage() {
     const chatInput = document.getElementById('chatInput');
     const messageText = chatInput ? chatInput.value.trim() : '';
@@ -10518,36 +10527,27 @@ async function sendChatMessage() {
     appendChatMessage(messageText, 'msg-user');
     chatInput.value = '';
 
-    // ۲. ساخت متن پیام برای ارسال به بله
+    // ۲. ساخت متن پیام
     const fullMessage = `📩 پیام جدید از سایت اترک\n👤 کد کاربر: ${currentSessionId}\n💬 متن: ${messageText}`;
 
-    // ۳. ارسال پیام از طریق پروکسی معتبر (برای حل مشکل CORS مرورگر)
-    const baleApiUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
-    const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(baleApiUrl);
+    // ۳. ارسال مستقیم با AllOrigins بدون مشکل ۴۰۳
+    const baleUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage?chat_id=${BALE_CHAT_ID}&text=${encodeURIComponent(fullMessage)}`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(baleUrl)}`;
 
     try {
-        const response = await fetch(proxyUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: BALE_CHAT_ID,
-                text: fullMessage
-            })
-        });
+        const response = await fetch(proxyUrl);
 
-        const data = await response.json();
-        if (data.ok) {
-            console.log('پیام با موفقیت به بازوی بله ارسال شد.');
+        if (response.ok) {
+            console.log('✅ پیام با موفقیت به بله ارسال شد.');
         } else {
-            console.error('خطای بله:', data);
+            console.error('❌ خطای پاسخ بله:', response.status);
         }
     } catch (error) {
-        console.error('خطا در ارتباط:', error);
+        console.error('❌ خطا در ارتباط:', error);
     }
 }
 
+// تابع اضافه کردن پیام به صفحه چت
 function appendChatMessage(text, typeClass) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
