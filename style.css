@@ -7018,7 +7018,7 @@ body.dark-mode .atrak-news-card:hover .atrak-news-card-title {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    z-index: 99999;
+    z-index: 200001;
 }
 
 .atrak-news-modal {
