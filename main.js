@@ -1228,7 +1228,7 @@ function openAtrakNewsAdmin(editId = '') {
                     تاریخ انتشار
 
                     <input
-                        type="date"
+                        type="text"
                         id="atrakNewsDateInput"
                         value="${editing ? escapeAtrakNewsHTML(editing.date) : new Date().toISOString().slice(0,10)}">
                 </label>
