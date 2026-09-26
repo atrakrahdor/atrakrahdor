@@ -10525,21 +10525,24 @@ async function sendChatMessage() {
     chatInput.value = '';
 
     try {
-        // ۲. ذخیره مستقیم پیام در Supabase (بدون نیاز به پروکسی و بله)
-        const { data, error } = await supabaseClient
-            .from('messages') // یا نام جدولی که در دیتابیس داری
+        const client = window.supabase || supabase;
+        
+        // ذخیره پیام در جدول site_comments
+        const { data, error } = await client
+            .from('site_comments')
             .insert([
                 { 
-                    user_id: currentSessionId, 
+                    page_key: 'live_chat',
+                    commenter_name: currentSessionId,
                     content: messageText,
-                    created_at: new Date()
+                    status: 'pending'
                 }
             ]);
 
         if (error) {
-            console.error('❌ خطا در ذخیره در Supabase:', error.message);
+            console.error('❌ خطا در ذخیره پیام:', error.message);
         } else {
-            console.log('✅ پیام با موفقیت در دیتابیس ذخیره شد.');
+            console.log('✅ پیام با موفقیت در Supabase ثبت شد.');
         }
     } catch (err) {
         console.error('❌ خطای غیرمنتظره:', err);
