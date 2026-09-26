@@ -1,11 +1,11 @@
 (function () {
-  // ۱. کلیدهای ذخیره‌سازی اختصاصی
-  const KEY_MESSAGES = 'my_custom_chat_messages';
-  const KEY_STATE = 'my_custom_chat_state';
+  // ۱. کلیدهای حافظه مرورگر
+  const STORAGE_MSG = 'FINAL_CHAT_MESSAGES_LIST';
+  const STORAGE_DATA = 'FINAL_CHAT_USER_DATA';
 
-  // ۲. بارگیری از حافظه مرورگر
-  let messages = JSON.parse(localStorage.getItem(KEY_MESSAGES)) || [];
-  let state = JSON.parse(localStorage.getItem(KEY_STATE)) || {
+  // ۲. دریافت پیام‌ها و اطلاعات از حافظه
+  let chatMessages = JSON.parse(localStorage.getItem(STORAGE_MSG)) || [];
+  let userData = JSON.parse(localStorage.getItem(STORAGE_DATA)) || {
     step: 1,
     name: '',
     phone: '',
@@ -14,130 +14,145 @@
     contactPref: ''
   };
 
-  // گرفتن عناصر از صفحه یا پیدا کردن دایرکت آن‌ها
   const logsEl = document.getElementById('chat-logs');
   const controlsEl = document.getElementById('chat-controls');
 
-  if (!logsEl || !controlsEl) {
-    console.error('خطا: عناصر chat-logs یا chat-controls در صفحه پیدا نشدند.');
-    return;
+  if (!logsEl || !controlsEl) return;
+
+  // ۳. تابع اصلی ثبت پیام (بدون هیچ شرطی مستقیم میره تو حافظه)
+  function sendMsg(sender, text) {
+    chatMessages.push({ sender: sender, text: text });
+    localStorage.setItem(STORAGE_MSG, JSON.stringify(chatMessages));
+    drawMessages();
   }
 
-  // ۳. تابع ذخیره و نمایش پیام
-  function addMessage(sender, text) {
-    messages.push({ sender, text });
-    localStorage.setItem(KEY_MESSAGES, JSON.stringify(messages));
-    renderMessages();
+  function saveData() {
+    localStorage.setItem(STORAGE_DATA, JSON.stringify(userData));
   }
 
-  function updateState(newState) {
-    state = Object.assign({}, state, newState);
-    localStorage.setItem(KEY_STATE, JSON.stringify(state));
-  }
-
-  // ۴. رندر کامل پیام‌ها از روی حافظه
-  function renderMessages() {
+  // ۴. چاپ کامل تمام پیام‌های موجود در حافظه
+  function drawMessages() {
     logsEl.innerHTML = '';
-    messages.forEach(function (m) {
+    chatMessages.forEach(function (m) {
       const div = document.createElement('div');
-      div.style.marginBottom = '6px';
+      div.style.marginBottom = '8px';
       div.innerHTML = '<strong>' + m.sender + ':</strong> ' + m.text;
       logsEl.appendChild(div);
     });
     logsEl.scrollTop = logsEl.scrollHeight;
   }
 
-  // ۵. مدیریت فرم‌ها و ورودی‌ها
-  function renderControls() {
+  // ۵. مدیریت دکمه‌ها و ورودی‌ها
+  function renderStepControls() {
     controlsEl.innerHTML = '';
 
-    if (state.step === 1) {
+    // مرحله ۱: نام و شماره
+    if (userData.step === 1) {
       controlsEl.innerHTML = 
-        '<input type="text" id="m-name" placeholder="نام و نام خانوادگی"><br>' +
-        '<input type="tel" id="m-phone" placeholder="شماره تماس"><br>' +
-        '<button id="btn-s1">تأیید</button>';
+        '<input type="text" id="f-name" placeholder="نام و نام خانوادگی"><br>' +
+        '<input type="tel" id="f-phone" placeholder="شماره تماس"><br>' +
+        '<button id="btn-1">تأیید</button>';
 
-      document.getElementById('btn-s1').onclick = function () {
-        const name = document.getElementById('m-name').value.trim();
-        const phone = document.getElementById('m-phone').value.trim();
-        if (!name || !phone) return alert('لطفاً همه فیلدها را پر کنید.');
+      document.getElementById('btn-1').onclick = function () {
+        const n = document.getElementById('f-name').value.trim();
+        const p = document.getElementById('f-phone').value.trim();
+        if (!n || !p) return alert('لطفاً اطلاعات را کامل وارد کنید.');
 
-        addMessage('شما', name + ' - ' + phone);
-        updateState({ name: name, phone: phone, step: 2 });
-        addMessage('مدیریت', 'پیام‌رسان مورد نظر خود را انتخاب کنید:');
-        renderControls();
+        userData.name = n;
+        userData.phone = p;
+        userData.step = 2;
+        saveData();
+
+        sendMsg('شما', n + ' - ' + p);
+        sendMsg('مدیریت', 'پیام‌رسان مورد نظر خود را انتخاب کنید:');
+        renderStepControls();
       };
     } 
-    else if (state.step === 2) {
+    // مرحله ۲: انتخاب پیام‌رسان
+    else if (userData.step === 2) {
       controlsEl.innerHTML = 
-        '<button class="m-btn" data-v="بله">بله</button> ' +
-        '<button class="m-btn" data-v="تلگرام">تلگرام</button> ' +
-        '<button class="m-btn" data-v="شاد">شاد</button>';
+        '<button class="m-select" data-m="بله">بله</button> ' +
+        '<button class="m-select" data-m="تلگرام">تلگرام</button> ' +
+        '<button class="m-select" data-m="شاد">شاد</button>';
 
-      const btns = controlsEl.querySelectorAll('.m-btn');
-      btns.forEach(function (btn) {
-        btn.onclick = function () {
-          const val = this.getAttribute('data-v');
-          addMessage('شما', val);
-          updateState({ messenger: val, step: 2.5 });
-          addMessage('مدیریت', 'آیدی خود در ' + val + ' را وارد کنید:');
-          renderControls();
+      const btns = controlsEl.querySelectorAll('.m-select');
+      btns.forEach(function (b) {
+        b.onclick = function () {
+          const selectedM = this.getAttribute('data-m');
+          userData.messenger = selectedM;
+          userData.step = 2.5;
+          saveData();
+
+          sendMsg('شما', selectedM);
+          sendMsg('مدیریت', 'آیدی خود در ' + selectedM + ' را وارد کنید:');
+          renderStepControls();
         };
       });
     } 
-    else if (state.step === 2.5) {
+    // مرحله ۲.۵: گرفتن آیدی
+    else if (userData.step === 2.5) {
       controlsEl.innerHTML = 
-        '<input type="text" id="m-id" placeholder="آیدی ' + state.messenger + '"><br>' +
-        '<button id="btn-s2">تأیید آیدی</button>';
+        '<input type="text" id="f-id" placeholder="آیدی ' + userData.messenger + '"><br>' +
+        '<button id="btn-2">تأیید آیدی</button>';
 
-      document.getElementById('btn-s2').onclick = function () {
-        const idVal = document.getElementById('m-id').value.trim();
+      document.getElementById('btn-2').onclick = function () {
+        const idVal = document.getElementById('f-id').value.trim();
         if (!idVal) return alert('لطفاً آیدی را وارد کنید.');
 
-        addMessage('شما', idVal);
-        updateState({ messengerId: idVal, step: 3 });
-        addMessage('مدیریت', 'ترجیح می‌دهید چگونه با شما در ارتباط باشیم؟');
-        renderControls();
+        userData.messengerId = idVal;
+        userData.step = 3;
+        saveData();
+
+        sendMsg('شما', idVal);
+        sendMsg('مدیریت', 'ترجیح می‌دهید چگونه با شما در ارتباط باشیم؟');
+        renderStepControls();
       };
     } 
-    else if (state.step === 3) {
+    // مرحله ۳: نحوه ارتباط
+    else if (userData.step === 3) {
       controlsEl.innerHTML = 
-        '<button class="p-btn" data-k="call" data-t="با شما تماس خواهیم گرفت">با شما تماس خواهیم گرفت</button><br>' +
-        '<button class="p-btn" data-k="messenger" data-t="به شما در پیام‌رسان انتخاب شده پیام خواهیم داد">به شما در پیام‌رسان انتخاب شده پیام خواهیم داد</button><br>' +
-        '<button class="p-btn" data-k="sms" data-t="به شما پیامک خواهیم داد">به شما پیامک خواهیم داد</button>';
+        '<button class="p-select" data-k="call" data-t="با شما تماس خواهیم گرفت">با شما تماس خواهیم گرفت</button><br>' +
+        '<button class="p-select" data-k="messenger" data-t="به شما در پیام‌رسان انتخاب شده پیام خواهیم داد">به شما در پیام‌رسان انتخاب شده پیام خواهیم داد</button><br>' +
+        '<button class="p-select" data-k="sms" data-t="به شما پیامک خواهیم داد">به شما پیامک خواهیم داد</button>';
 
-      const pBtns = controlsEl.querySelectorAll('.p-btn');
-      pBtns.forEach(function (btn) {
-        btn.onclick = function () {
+      const pBtns = controlsEl.querySelectorAll('.p-select');
+      pBtns.forEach(function (b) {
+        b.onclick = function () {
           const key = this.getAttribute('data-k');
-          const text = this.getAttribute('data-t');
+          const txt = this.getAttribute('data-t');
 
-          addMessage('شما', text);
-          updateState({ contactPref: key, step: 4 });
+          userData.contactPref = key;
+          userData.step = 4;
+          saveData();
+
+          sendMsg('شما', txt);
 
           let reply = '';
           if (key === 'messenger') {
-            reply = 'مشاوران ما با شما در پیام‌رسان ' + state.messenger + ' (آیدی: ' + state.messengerId + ') در ارتباط خواهند بود.';
+            reply = 'مشاوران ما با شما در پیام‌رسان ' + userData.messenger + ' (آیدی: ' + userData.messengerId + ') در ارتباط خواهند بود.';
           } else if (key === 'call') {
-            reply = 'مشاوران ما به زودی با شماره ' + state.phone + ' تماس خواهند گرفت.';
+            reply = 'مشاوران ما به زودی با شماره ' + userData.phone + ' تماس خواهند گرفت.';
           } else if (key === 'sms') {
-            reply = 'پیامک‌های مربوطه به شماره ' + state.phone + ' ارسال خواهد شد.';
+            reply = 'پیامک‌های مربوطه به شماره ' + userData.phone + ' ارسال خواهد شد.';
           }
 
-          addMessage('مدیریت', state.name + ' عزیز، اطلاعات شما ثبت شد. ' + reply);
-          renderControls();
+          sendMsg('مدیریت', userData.name + ' عزیز، اطلاعات شما ثبت شد. ' + reply);
+          renderStepControls();
         };
       });
     } 
-    else if (state.step === 4) {
-      controlsEl.innerHTML = '<span>اطلاعات شما با موفقیت ثبت گردید.</span>';
+    // مرحله پایان
+    else if (userData.step === 4) {
+      controlsEl.innerHTML = '<span>اطلاعات شما با موفقیت ثبت شد.</span>';
     }
   }
 
-  // ۶. شروع و بازیابی چت
-  renderMessages();
-  if (messages.length === 0) {
-    addMessage('مدیریت', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
+  // اجرای اولیه هنگام لود یا رفرش صفحه
+  drawMessages();
+
+  if (chatMessages.length === 0) {
+    sendMsg('مدیریت', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
   }
-  renderControls();
+
+  renderStepControls();
 })();
