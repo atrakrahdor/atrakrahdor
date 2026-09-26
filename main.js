@@ -10596,6 +10596,40 @@ function appendChatMessage(text, typeClass) {
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+// بررسی دوره‌ای پاسخ‌هایی که از بله (توسط ادمین) ارسال شده‌اند
+let atrakLastSeenReplyId = 0;
+async function pollForBaleReplies() {
+    try {
+        const client = getAtrakChatClient();
+        if (!client) return;
+
+        const { data, error } = await client
+            .from('site_comments')
+            .select('id, content')
+            .eq('page_key', 'live_chat_reply')
+            .eq('commenter_name', currentSessionId)
+            .gt('id', atrakLastSeenReplyId)
+            .order('id', { ascending: true });
+
+        if (error) {
+            console.error('❌ خطا در دریافت پاسخ‌ها:', error.message);
+            return;
+        }
+
+        if (data && data.length) {
+            data.forEach(function (row) {
+                appendChatMessage(row.content, 'msg-bot');
+                if (row.id > atrakLastSeenReplyId) {
+                    atrakLastSeenReplyId = row.id;
+                }
+            });
+        }
+    } catch (err) {
+        console.error('❌ خطای غیرمنتظره در دریافت پاسخ:', err);
+    }
+}
+
+setInterval(pollForBaleReplies, 4000);
         function toggleFaq(faqItem) {
             faqItem.classList.toggle('open');
         }
