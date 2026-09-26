@@ -1,5 +1,9 @@
-// ۱. بازیابی داده‌ها یا ایجاد ساختار اولیه
-const userData = JSON.parse(localStorage.getItem('chat_user_data')) || {
+// ۱. ساختار ذخیره‌سازی جامع
+const CHAT_STORAGE_KEY = 'my_chat_history_data';
+const USER_DATA_KEY = 'my_chat_user_info';
+
+let chatHistory = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || [];
+let userData = JSON.parse(localStorage.getItem(USER_DATA_KEY)) || {
   name: '',
   phone: '',
   messenger: '',
@@ -8,58 +12,57 @@ const userData = JSON.parse(localStorage.getItem('chat_user_data')) || {
   step: 1
 };
 
-// دریافت تاریخچه پیام‌ها از حافظه
-let chatHistory = JSON.parse(localStorage.getItem('chat_history')) || [];
-
 const logs = document.getElementById('chat-logs');
 const controls = document.getElementById('chat-controls');
 
-// تابع افزودن و ذخیره پیام
-function addMessage(sender, text) {
-  // رندر پیام در صفحه
+// ۲. تابع اصلی ثبت و نمایش تمام پیام‌ها (مدیریت + کاربر)
+function saveAndRenderMessage(sender, text) {
+  // اضافه به آرایه اصلی
+  chatHistory.push({ sender, text, time: new Date().getTime() });
+  
+  // ذخیره لحظه‌ای در حافظه مرورگر
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatHistory));
+
+  // رندر در صفحه
+  renderSingleMessage(sender, text);
+}
+
+function renderSingleMessage(sender, text) {
   const msg = document.createElement('div');
+  msg.className = `msg-item msg-${sender === 'شما' ? 'user' : 'admin'}`;
   msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
   logs.appendChild(msg);
-
-  // ذخیره در تاریخچه
-  chatHistory.push({ sender, text });
-  localStorage.setItem('chat_history', JSON.stringify(chatHistory));
+  logs.scrollTop = logs.scrollHeight;
 }
 
-// تابع ذخیره وضعیت کاربر
-function saveUserData() {
-  localStorage.setItem('chat_user_data', JSON.stringify(userData));
-}
-
-// بازیابی و نمایش پیام‌های قبلی هنگام رفرش
-function loadHistory() {
+// ۳. بازیابی کامل همه پیام‌ها هنگام رفرش
+function loadAllHistory() {
   logs.innerHTML = '';
   chatHistory.forEach(item => {
-    const msg = document.createElement('div');
-    msg.innerHTML = `<strong>${item.sender}:</strong> ${item.text}`;
-    logs.appendChild(msg);
+    renderSingleMessage(item.sender, item.text);
   });
 }
 
-// شروع و کنترل مراحل چت
-function initChat() {
-  loadHistory();
+function saveUserData() {
+  localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+}
 
-  // اگر پیامی از قبل ثبت نشده، پیام اول شروع شود
+// ۴. مدیریت مراحل فرم چت
+function initChat() {
+  loadAllHistory();
+
   if (chatHistory.length === 0) {
     step1_GetUserInfo();
   } else {
-    // بازگرداندن کنترل‌ها بر اساس آخرین مرحله کاربر
-    restoreLastStep();
+    restoreStepControls();
   }
 }
 
-// مرحله ۱: دریافت نام و تماس
 function step1_GetUserInfo() {
   userData.step = 1;
   saveUserData();
   
-  addMessage('سیستم', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
+  saveAndRenderMessage('مدیریت', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
   renderStep1Controls();
 }
 
@@ -75,7 +78,7 @@ function renderStep1Controls() {
     const phone = document.getElementById('input-phone').value.trim();
 
     if (!name || !phone) {
-      alert('لطفاً همه موارد را پر کنید.');
+      alert('لطفاً تمامی موارد را پر کنید.');
       return;
     }
 
@@ -83,17 +86,17 @@ function renderStep1Controls() {
     userData.phone = phone;
     saveUserData();
 
-    addMessage('شما', `${name} - ${phone}`);
+    // ذخیره پیام کاربر
+    saveAndRenderMessage('شما', `${name} - ${phone}`);
     step2_SelectMessenger();
   };
 }
 
-// مرحله ۲: انتخاب پیام‌رسان
 function step2_SelectMessenger() {
   userData.step = 2;
   saveUserData();
 
-  addMessage('سیستم', 'پیام‌رسان مورد نظر خود را انتخاب کنید:');
+  saveAndRenderMessage('مدیریت', 'پیام‌رسان مورد نظر خود را انتخاب کنید:');
   renderStep2Controls();
 }
 
@@ -106,21 +109,22 @@ function renderStep2Controls() {
 
   controls.querySelectorAll('.btn-m').forEach(btn => {
     btn.onclick = function() {
-      userData.messenger = this.getAttribute('data-name');
+      const selectedMessenger = this.getAttribute('data-name');
+      userData.messenger = selectedMessenger;
       saveUserData();
 
-      addMessage('شما', userData.messenger);
+      // ذخیره پیام کاربر
+      saveAndRenderMessage('شما', selectedMessenger);
       step2_GetMessengerId();
     };
   });
 }
 
-// مرحله ۲ تکمیلی: آیدی پیام‌رسان
 function step2_GetMessengerId() {
   userData.step = 2.5;
   saveUserData();
 
-  addMessage('سیستم', `آیدی خود در ${userData.messenger} را وارد کنید:`);
+  saveAndRenderMessage('مدیریت', `آیدی خود در ${userData.messenger} را وارد کنید:`);
   renderMessengerIdControls();
 }
 
@@ -140,17 +144,17 @@ function renderMessengerIdControls() {
     userData.messengerId = idVal;
     saveUserData();
 
-    addMessage('شما', idVal);
+    // ذخیره پیام کاربر
+    saveAndRenderMessage('شما', idVal);
     step3_SelectContactPref();
   };
 }
 
-// مرحله ۳: نحوه ارتباط
 function step3_SelectContactPref() {
   userData.step = 3;
   saveUserData();
 
-  addMessage('سیستم', 'ترجیح می‌دهید چگونه با شما در ارتباط باشیم؟');
+  saveAndRenderMessage('مدیریت', 'ترجیح می‌دهید چگونه با شما در ارتباط باشیم؟');
   renderStep3Controls();
 }
 
@@ -163,16 +167,17 @@ function renderStep3Controls() {
 
   controls.querySelectorAll('.btn-pref').forEach(btn => {
     btn.onclick = function() {
+      const prefText = this.innerText;
       userData.contactPref = this.getAttribute('data-pref');
       saveUserData();
 
-      addMessage('شما', this.innerText);
+      // ذخیره پیام کاربر
+      saveAndRenderMessage('شما', prefText);
       finishProcess();
     };
   });
 }
 
-// پایان فرایند
 function finishProcess() {
   userData.step = 4;
   saveUserData();
@@ -187,11 +192,10 @@ function finishProcess() {
     replyText = `پیامک‌های مربوطه به شماره ${userData.phone} ارسال خواهد شد.`;
   }
 
-  addMessage('سیستم', `${userData.name} عزیز، اطلاعات شما ثبت شد. ${replyText}`);
+  saveAndRenderMessage('مدیریت', `${userData.name} عزیز، اطلاعات شما ثبت شد. ${replyText}`);
 }
 
-// بازیابی فرم در صورت رفرش وسط کار
-function restoreLastStep() {
+function restoreStepControls() {
   if (userData.step === 1) renderStep1Controls();
   else if (userData.step === 2) renderStep2Controls();
   else if (userData.step === 2.5) renderMessengerIdControls();
@@ -199,5 +203,5 @@ function restoreLastStep() {
   else controls.innerHTML = '';
 }
 
-// اجرا در زمان بارگذاری صفحه
+// شروع برنامه
 initChat();
