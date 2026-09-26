@@ -10524,32 +10524,25 @@ async function sendChatMessage() {
     appendChatMessage(messageText, 'msg-user');
     chatInput.value = '';
 
-    // ۲. متن پیام
-    const fullMessage = `📩 پیام جدید از سایت اترک\n👤 کاربر: ${currentSessionId}\n💬 متن: ${messageText}`;
-
-    // ۳. ارسال به سرویس پروکسی معتبر ThingProxy با متد POST
-    const targetUrl = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
-    const proxyUrl = `https://thingproxy.freeboard.io/fetch/${targetUrl}`;
-
     try {
-        const response = await fetch(proxyUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: BALE_CHAT_ID,
-                text: fullMessage
-            })
-        });
+        // ۲. ذخیره مستقیم پیام در Supabase (بدون نیاز به پروکسی و بله)
+        const { data, error } = await supabaseClient
+            .from('messages') // یا نام جدولی که در دیتابیس داری
+            .insert([
+                { 
+                    user_id: currentSessionId, 
+                    content: messageText,
+                    created_at: new Date()
+                }
+            ]);
 
-        if (response.ok) {
-            console.log('✅ پیام با موفقیت به بله ارسال شد.');
+        if (error) {
+            console.error('❌ خطا در ذخیره در Supabase:', error.message);
         } else {
-            console.error('❌ خطا در ارسال به بله:', response.status);
+            console.log('✅ پیام با موفقیت در دیتابیس ذخیره شد.');
         }
-    } catch (error) {
-        console.error('❌ خطا در ارتباط شبکه:', error);
+    } catch (err) {
+        console.error('❌ خطای غیرمنتظره:', err);
     }
 }
 
