@@ -10498,7 +10498,7 @@ function logoutStudent() {
             if (e.key === 'Enter') sendChatMessage();
         }
 
-// تنظیمات بازوی بله مدرسه اترک
+   // تنظیمات بازوی بله مدرسه اترک
 const BALE_BOT_TOKEN = "1217256057:d_n9HdPE77NFRh-KdK3bCk0e1EMcbxZwMLM";
 const BALE_CHAT_ID = "147638651";
 
@@ -10524,14 +10524,13 @@ async function sendChatMessage() {
     appendChatMessage(messageText, 'msg-user');
     chatInput.value = '';
 
+    // ۲. ذخیره پیام در Supabase
     try {
         const client = window.supabase || supabase;
-        
-        // ذخیره پیام در جدول site_comments
         const { data, error } = await client
             .from('site_comments')
             .insert([
-                { 
+                {
                     page_key: 'live_chat',
                     commenter_name: currentSessionId,
                     content: messageText,
@@ -10546,6 +10545,25 @@ async function sendChatMessage() {
         }
     } catch (err) {
         console.error('❌ خطای غیرمنتظره:', err);
+    }
+
+    // ۳. ارسال پیام به بله (بخشی که کم بود)
+    try {
+        const text = `پیام جدید از سایت (${currentSessionId}):\n${messageText}`;
+        const url = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: BALE_CHAT_ID, text })
+        });
+        const result = await res.json();
+        if (!result.ok) {
+            console.error('❌ خطا در ارسال به بله:', result);
+        } else {
+            console.log('✅ پیام به بله ارسال شد.');
+        }
+    } catch (err) {
+        console.error('❌ خطای ارسال به بله:', err);
     }
 }
 
