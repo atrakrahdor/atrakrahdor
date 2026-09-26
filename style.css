@@ -9201,3 +9201,25 @@ body.admin-mode #mainAppContent {
     .atrak-honors-grid { grid-template-columns: 1fr; }
     .atrak-honor-placeholder { min-height: 260px; }
 }
+#chat-box {
+  width: 300px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  direction: rtl;
+  font-family: sans-serif;
+}
+
+#chat-logs {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#chat-logs div {
+  margin-bottom: 5px;
+}
+
+#chat-controls input, 
+#chat-controls button {
+  margin-top: 5px;
+}
