@@ -10501,8 +10501,7 @@ function logoutStudent() {
      // تنظیمات بازوی بله مدرسه اترک
    // توجه: توکن ربات دیگر اینجا (سمت کاربر) قرار داده نمی‌شود.
    // ارسال پیام به بله از طریق Supabase Edge Function انجام می‌شود تا توکن لو نرود.
-const BALE_EDGE_FUNCTION_URL = "https://ynbtegberxjesxvjevoi.supabase.co/functions/v1/send-to-bale";
-
+const BALE_EDGE_FUNCTION_URL = "https://ynbtegberxjesxvjevoi.supabase.co/functions/v1/super-handler";
 if (!localStorage.getItem('chat_session_id')) {
     localStorage.setItem('chat_session_id', 'user_' + Math.floor(1000 + Math.random() * 9000));
 }
