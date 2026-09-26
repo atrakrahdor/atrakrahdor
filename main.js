@@ -10498,14 +10498,27 @@ function logoutStudent() {
             if (e.key === 'Enter') sendChatMessage();
         }
 
-   // تنظیمات بازوی بله مدرسه اترک
-const BALE_BOT_TOKEN = "1217256057:d_n9HdPE77NFRh-KdK3bCk0e1EMcbxZwMLM";
-const BALE_CHAT_ID = "147638651";
+     // تنظیمات بازوی بله مدرسه اترک
+   // توجه: توکن ربات دیگر اینجا (سمت کاربر) قرار داده نمی‌شود.
+   // ارسال پیام به بله از طریق Supabase Edge Function انجام می‌شود تا توکن لو نرود.
+const BALE_EDGE_FUNCTION_URL = "https://ynbtegberxjesxvjevoi.supabase.co/functions/v1/send-to-bale";
 
 if (!localStorage.getItem('chat_session_id')) {
     localStorage.setItem('chat_session_id', 'user_' + Math.floor(1000 + Math.random() * 9000));
 }
 const currentSessionId = localStorage.getItem('chat_session_id');
+
+// یک کلاینت واقعی Supabase مخصوص چت (فقط یک‌بار ساخته می‌شود)
+let atrakChatSupabaseClient = null;
+function getAtrakChatClient() {
+    if (atrakChatSupabaseClient) return atrakChatSupabaseClient;
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        console.error('❌ کتابخانه Supabase هنوز لود نشده است.');
+        return null;
+    }
+    atrakChatSupabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return atrakChatSupabaseClient;
+}
 
 function handleChatEnter(event) {
     if (event.key === 'Enter') {
@@ -10526,7 +10539,9 @@ async function sendChatMessage() {
 
     // ۲. ذخیره پیام در Supabase
     try {
-        const client = window.supabase || supabase;
+        const client = getAtrakChatClient();
+        if (!client) throw new Error('Supabase client not ready');
+
         const { data, error } = await client
             .from('site_comments')
             .insert([
@@ -10547,14 +10562,19 @@ async function sendChatMessage() {
         console.error('❌ خطای غیرمنتظره:', err);
     }
 
-    // ۳. ارسال پیام به بله (بخشی که کم بود)
+    // ۳. ارسال پیام به بله از طریق Edge Function امن (توکن اینجا وجود ندارد)
     try {
-        const text = `پیام جدید از سایت (${currentSessionId}):\n${messageText}`;
-        const url = `https://tapi.bale.ai/bot${BALE_BOT_TOKEN}/sendMessage`;
-        const res = await fetch(url, {
+        const res = await fetch(BALE_EDGE_FUNCTION_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: BALE_CHAT_ID, text })
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({
+                session_id: currentSessionId,
+                message: messageText
+            })
         });
         const result = await res.json();
         if (!result.ok) {
