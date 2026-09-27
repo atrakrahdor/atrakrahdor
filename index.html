@@ -403,20 +403,29 @@
 
 <!-- استایل اختصاصی چت‌باکس مشاوره -->
 <style>
-  .form-chat-wrapper {
-    width: 320px;
-    border-radius: 16px;
+ .form-chat-wrapper {
+    position: fixed;
+    bottom: 178px;
+    right: 28px;
+    width: min(340px, 85vw);
+    height: 480px;
+    border-radius: 24px;
     background-color: #ffffff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
     font-family: Tahoma, sans-serif;
     direction: rtl;
     overflow: hidden;
     border: 1px solid #e0e0e0;
-    margin: 15px auto;
-  }
+    margin: 0;
+    z-index: 1001;
+    display: none;
+    flex-direction: column;
+    animation: chatPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.form-chat-wrapper.active { display: flex; }
 
-  .form-chat-header {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
+.form-chat-header {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #ffffff;
     padding: 12px 15px;
     display: flex;
@@ -424,7 +433,18 @@
     gap: 10px;
     font-weight: bold;
     font-size: 14px;
-  }
+    flex-shrink: 0;
+}
+.form-chat-close-btn {
+    margin-inline-start: auto;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+}
 
   .form-chat-header .chat-icon {
     width: 24px;
@@ -498,18 +518,30 @@
   }
 </style>
 
-<!-- چت‌باکس جدید مشاوره -->
-<div class="form-chat-wrapper">
+<div class="consultation-toggle-floating" onclick="toggleConsultationModal()" title="مشاوره">
+<svg fill="none" height="26" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="26">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+</svg>
+</div>
+
+<div class="form-chat-wrapper" id="consultationModal">
   <div class="form-chat-header">
     <svg class="chat-icon" viewBox="0 0 24 24">
       <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
     </svg>
-    <span>فرم درخواست مشاوره</span>
+    <span>مشاوره</span>
+    <button class="form-chat-close-btn" onclick="toggleConsultationModal()" aria-label="بستن گفت‌وگو" type="button">✕</button>
   </div>
-
   <div id="form-chat-logs"></div>
   <div id="form-chat-controls"></div>
 </div>
+
+<script>
+  function toggleConsultationModal() {
+    const panel = document.getElementById('consultationModal');
+    if (panel) panel.classList.toggle('active');
+  }
+</script>
 
 <!-- کتابخانه‌های خارجی -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
