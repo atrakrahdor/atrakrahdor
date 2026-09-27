@@ -9223,3 +9223,7 @@ body.admin-mode #mainAppContent {
 #chat-controls button {
   margin-top: 5px;
 }
+/* مخفی کردن بخش دکمه‌ها و ورودی‌های فرم چت */
+#chat-controls {
+    display: none !important;
+}
