@@ -15,6 +15,54 @@ let userData = JSON.parse(localStorage.getItem(STORAGE_DATA)) || {
 let logsEl = null;
 let controlsEl = null;
 
+// --- ارسال اطلاعات فرم مشاوره به ربات بله (مثل چت‌باکس پشتیبانی) ---
+const SUPABASE_URL = 'https://ynbtegberxjesxvjevoi.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_IO2OKA-9uPneVIDfL3avJg_fsKbPlHG';
+const BALE_EDGE_FUNCTION_URL = SUPABASE_URL + '/functions/v1/super-handler';
+
+if (!localStorage.getItem('form_chat_session_id')) {
+  localStorage.setItem('form_chat_session_id', 'form_' + Math.floor(1000 + Math.random() * 9000));
+}
+const formSessionId = localStorage.getItem('form_chat_session_id');
+
+async function sendFormDataToBale() {
+  const contactLabel =
+    userData.contactPref === 'call' ? 'تماس تلفنی' :
+    userData.contactPref === 'messenger' ? `پیام در ${userData.messenger}` :
+    userData.contactPref === 'sms' ? 'پیامک' : userData.contactPref;
+
+  const message =
+    `📋 درخواست مشاوره جدید از سایت\n` +
+    `نام: ${userData.name}\n` +
+    `شماره تماس: ${userData.phone}\n` +
+    `پیام‌رسان: ${userData.messenger}\n` +
+    `آیدی پیام‌رسان: ${userData.messengerId}\n` +
+    `نحوه ارتباط ترجیحی: ${contactLabel}`;
+
+  try {
+    const res = await fetch(BALE_EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({
+        session_id: formSessionId,
+        message: message
+      })
+    });
+    const result = await res.json();
+    if (!result.ok) {
+      console.error('❌ خطا در ارسال فرم مشاوره به بله:', result);
+    } else {
+      console.log('✅ اطلاعات فرم مشاوره به بله ارسال شد.');
+    }
+  } catch (err) {
+    console.error('❌ خطای ارسال فرم مشاوره به بله:', err);
+  }
+}
+
 function sendMsg(sender, text) {
   messages.push({ sender, text });
   localStorage.setItem(STORAGE_MSG, JSON.stringify(messages));
@@ -120,36 +168,4 @@ function renderControls() {
 
         sendMsg('شما', txt);
 
-        let reply = '';
-        if (key === 'messenger') {
-          reply = `مشاوران ما با شما در پیام‌رسان ${userData.messenger} (آیدی: ${userData.messengerId}) در ارتباط خواهند بود.`;
-        } else if (key === 'call') {
-          reply = `مشاوران ما به زودی با شماره ${userData.phone} تماس خواهند گرفت.`;
-        } else if (key === 'sms') {
-          reply = `پیامک‌های مربوطه به شماره ${userData.phone} ارسال خواهد شد.`;
-        }
-
-        sendMsg('سیستم', `${userData.name} عزیز، اطلاعات شما ثبت شد. ${reply}`);
-        renderControls();
-      };
-    });
-  } 
-  else if (userData.step === 4) {
-    controlsEl.innerHTML = '<div style="text-align:center; color:#28a745; font-size:12px; padding:5px;">اطلاعات شما با موفقیت ثبت گردید.</div>';
-  }
-}
-
-export function initFormChat(logsContainerId = 'form-chat-logs', controlsContainerId = 'form-chat-controls') {
-  logsEl = document.getElementById(logsContainerId);
-  controlsEl = document.getElementById(controlsContainerId);
-
-  if (!logsEl || !controlsEl) return;
-
-  renderMessages();
-
-  if (messages.length === 0) {
-    sendMsg('سیستم', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
-  }
-
-  renderControls();
-}
+        let
