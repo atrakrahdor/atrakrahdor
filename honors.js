@@ -30,71 +30,45 @@ async function saveAtrakHonors(list) {
 
 
 function renderAtrakHonors(containerId) {
-
-    const container =
-        document.getElementById(containerId);
-
+    const container = document.getElementById(containerId);
     if (!container) return;
 
-    const students =
-        getAtrakHonors();
+    const students = getAtrakHonors();
 
-   if (!students.length) {
+    if (!students.length) {
+        container.innerHTML = `
+          <div id="atrak-honors">
+            <div class="atrak-test-honor-card"></div>
+            <div class="atrak-test-honor-card"></div>
+            <div class="atrak-test-honor-card"></div>
+            <div class="atrak-test-honor-card"></div>
+          </div>
+        `;
+        return;
+    }
 
-    container.innerHTML = `
-      <div id="atrak-honors">
-    <div class="atrak-test-honor-card"></div>
-    <div class="atrak-test-honor-card"></div>
-    <div class="atrak-test-honor-card"></div>
-    <div class="atrak-test-honor-card"></div>
-</div>
-    `;
-
-    return;
-}
-
-
-    container.innerHTML =
-        students.map((student, index) => `
-
-            <article class="atrak-honor-card">
-
-                <div class="atrak-honor-photo-wrap">
-
-                    <img
-                        src="${student.photo}"
-                        alt="${student.firstName} ${student.lastName}"
-                        class="atrak-honor-photo"
-                    >
-
-                </div>
-
-                <div class="atrak-honor-name">
-                    ${student.firstName} ${student.lastName}
-                </div>
-
-                <div class="atrak-honor-university">
-                    ${student.university}
-                </div>
-
-                ${
-                    state.isAdmin
-                    ?
-                    `
-                    <button
-                        class="atrak-honor-delete"
-                        onclick="deleteAtrakHonor(${index})"
-                    >
-                        حذف
-                    </button>
-                    `
-                    :
-                    ''
-                }
-
-            </article>
-
-        `).join('');
+    container.innerHTML = students.map((student, index) => `
+        <article class="atrak-honor-card">
+            <div class="atrak-honor-photo-wrap">
+                <img src="${student.photo}" alt="${student.firstName} ${student.lastName}" class="atrak-honor-photo">
+            </div>
+            <div class="atrak-honor-name">
+                ${student.firstName} ${student.lastName}
+            </div>
+            <div class="atrak-honor-university">
+                ${student.university}
+            </div>
+            ${
+                (typeof state !== 'undefined' && state.isAdmin)
+                ? `
+                <button class="atrak-honor-delete" onclick="deleteAtrakHonor(${index})">
+                    حذف
+                </button>
+                `
+                : ''
+            }
+        </article>
+    `).join('');
 }
 
 
