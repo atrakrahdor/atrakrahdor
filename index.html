@@ -525,20 +525,12 @@
 <script src="honors.js"></script>
 <script src="chat.js"></script>
 
-<!-- فایل دیتابیس (منتقل شد به پایین تا متغیرهای فایل‌های بالا ابتدا لود شوند) -->
+<!-- فایل دیتابیس -->
 <script src="supabase_2.js"></script>
 
 <!-- فراخوانی ماژول چت جدید از پوشه اصلاح‌شده (chat) -->
 <script type="module">
   import { initFormChat } from './chat/formChatModule.js';
-
-  document.addEventListener('DOMContentLoaded', () => {
-    initFormChat();
-  });
-</script>
-<!-- فراخوانی ماژول چت جدید از پوشه chat.js -->
-<script type="module">
-  import { initFormChat } from './chat.js/formChatModule.js';
 
   document.addEventListener('DOMContentLoaded', () => {
     initFormChat();
