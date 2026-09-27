@@ -766,7 +766,25 @@ top: 0;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 3px solid rgba(255, 255, 255, 0.8);
         }
-
+.consultation-toggle-floating {
+    position: fixed;
+    bottom: 108px;
+    right: 30px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.45);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+}
+.consultation-toggle-floating:hover { transform: scale(1.1) rotate(-8deg); }
         .chat-toggle-floating:hover { transform: scale(1.1) rotate(8deg); }
 
         .chat-modal-window {
@@ -1774,7 +1792,20 @@ top: 0;
         right: 14px;
         bottom: 14px;
     }
-
+.consultation-toggle-floating {
+    width: 52px;
+    height: 52px;
+    right: 14px;
+    bottom: 82px;
+}
+.form-chat-wrapper {
+    width: calc(100vw - 20px) !important;
+    max-width: none;
+    height: min(70vh, 520px) !important;
+    right: 10px !important;
+    bottom: 152px !important;
+    border-radius: 18px !important;
+}
     .chat-modal-window {
         width: calc(100vw - 20px);
         max-width: none;
