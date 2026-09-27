@@ -168,4 +168,37 @@ function renderControls() {
 
         sendMsg('شما', txt);
 
-        let
+        let reply = '';
+        if (key === 'messenger') {
+          reply = `مشاوران ما با شما در پیام‌رسان ${userData.messenger} (آیدی: ${userData.messengerId}) در ارتباط خواهند بود.`;
+        } else if (key === 'call') {
+          reply = `مشاوران ما به زودی با شماره ${userData.phone} تماس خواهند گرفت.`;
+        } else if (key === 'sms') {
+          reply = `پیامک‌های مربوطه به شماره ${userData.phone} ارسال خواهد شد.`;
+        }
+
+        sendMsg('سیستم', `${userData.name} عزیز، اطلاعات شما ثبت شد. ${reply}`);
+        sendFormDataToBale();
+        renderControls();
+      };
+    });
+  } 
+  else if (userData.step === 4) {
+    controlsEl.innerHTML = '<div style="text-align:center; color:#28a745; font-size:12px; padding:5px;">اطلاعات شما با موفقیت ثبت گردید.</div>';
+  }
+}
+
+export function initFormChat(logsContainerId = 'form-chat-logs', controlsContainerId = 'form-chat-controls') {
+  logsEl = document.getElementById(logsContainerId);
+  controlsEl = document.getElementById(controlsContainerId);
+
+  if (!logsEl || !controlsEl) return;
+
+  renderMessages();
+
+  if (messages.length === 0) {
+    sendMsg('سیستم', 'لطفاً نام، نام خانوادگی و شماره تماس خود را وارد کنید:');
+  }
+
+  renderControls();
+}
