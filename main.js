@@ -3511,6 +3511,16 @@ document.addEventListener(
         افتخارآفرینان مدرسه آموزش از راه دور اترک
     </h2>
 
+    <div class="atrak-honors-admin-box" id="atrakHonorsAdminBox">
+        <button
+            type="button"
+            class="atrak-honors-add-btn"
+            onclick="openAtrakHonorAdmin()"
+        >
+            + افزودن افتخارآفرین
+        </button>
+    </div>
+
     <div
         id="atrakHonorsHomeGrid"
         class="atrak-honors-grid"
@@ -6761,6 +6771,14 @@ if (
     renderAtrakHonors(
         'atrakHonorsPageGrid'
     );
+}
+
+/* نمایش یا مخفی‌کردن دکمه افزودن افتخارآفرین طبق وضعیت مدیریت،
+   هر بار که این صفحه دوباره ساخته می‌شود */
+const atrakHonorsAdminBoxEl = document.getElementById('atrakHonorsAdminBox');
+if (atrakHonorsAdminBoxEl) {
+    atrakHonorsAdminBoxEl.style.display =
+        (typeof state !== 'undefined' && state.isAdmin) ? 'flex' : 'none';
 }
     }, 100);
     
