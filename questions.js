@@ -59,6 +59,10 @@ function saveAllQuestionsData(data) {
             JSON.stringify(data)
         );
 
+        if (typeof syncStateToCloud === 'function') {
+            syncStateToCloud();
+        }
+
         return true;
 
     } catch (error) {
