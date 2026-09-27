@@ -10494,9 +10494,7 @@ function logoutStudent() {
             if (chat) chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function handleChatEnter(e) {
-            if (e.key === 'Enter') sendChatMessage();
-        }
+     
 
      // تنظیمات بازوی بله مدرسه اترک
    // توجه: توکن ربات دیگر اینجا (سمت کاربر) قرار داده نمی‌شود.
