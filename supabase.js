@@ -55,7 +55,8 @@ async function syncStateToCloud() {
             news: localStorage.getItem(ATRAK_NEWS_STORAGE_KEY) || '[]',
             components: localStorage.getItem('atrak_dynamic_elements_v1') || '[]',
             comments_v39: localStorage.getItem('atrak_comments_v39') || '[]',
-            honors: localStorage.getItem('atrak_honors_v1') || '[]',
+                       honors: localStorage.getItem('atrak_honors_v1') || '[]',
+            questions: localStorage.getItem('atrak_questions_v1') || '{}',
             updatedAt: updatedAt
         };
 
@@ -229,6 +230,12 @@ async function loadStateFromCloud() {
         }
         if (typeof data.iconColor === 'string') {
             localStorage.setItem('atrak_icon_color', data.iconColor);
+        }
+             if (typeof data.honors === 'string') {
+            localStorage.setItem('atrak_honors_v1', data.honors);
+        }
+        if (typeof data.questions === 'string') {
+            localStorage.setItem('atrak_questions_v1', data.questions);
         }
         if (typeof data.theme === 'string' && data.theme) {
             localStorage.setItem('atrak_theme', data.theme);
