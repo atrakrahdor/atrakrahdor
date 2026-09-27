@@ -10715,3 +10715,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+// ایمپورت ماژول مستقیم از پوشه chat.js
+import { initFormChat } from './chat.js/formChatModule.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    // اجرا کردن چت‌باکس جدید
+    initFormChat();
+});
