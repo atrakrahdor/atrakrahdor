@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-
+ 
 <html dir="rtl" lang="fa">
 <head>
 <meta charset="utf-8"/>
@@ -81,13 +81,13 @@
             C75 151 80 151 87 148
             L104 136
             C107 134 110 133 112.5 133
-
+ 
             C115 133 118 134 121 136
             L138 148
             C145 151 150 151 157 145
             L176 130
             C179 128 182 129 182 132
-
+ 
             L182 160
             C182 163 182 165 180 167
             L158 185
@@ -154,7 +154,7 @@
 <button class="atrak-second-nav-item" onclick="navigateTo('home')" type="button">
             صفحه اصلی
         </button>
-
+ 
 <div class="atrak-second-dropdown" id="atrakMaghtaDropdown">
 <button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakMaghtaDropdown')" type="button">
                 مقاطع
@@ -190,7 +190,7 @@
 </div>
 </div>
 </div>
-
+ 
 <div class="atrak-second-dropdown" id="atrakServicesDropdown">
 <button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakServicesDropdown')" type="button">
                 خدمات
@@ -209,7 +209,7 @@
 <button class="atrak-second-nav-item" onclick="navigateTo('news-archive')" type="button">
             اخبار
         </button>
-
+ 
 <div class="atrak-second-dropdown" id="atrakRemoteDropdown">
 <button class="atrak-second-nav-item atrak-second-dropdown-button" onclick="toggleAtrakDropdown('atrakRemoteDropdown')" type="button">
                 آموزش از راه دور
@@ -227,7 +227,7 @@
         </button>
 </div>
 </nav>
-
+ 
 <div class="page-navigation-bar" id="pageNavigationBar">
 <div class="nav-history-controls">
 <button aria-label="صفحه قبلی" class="nav-arrow-btn" id="btnBack" onclick="navGoBack()" title="صفحه قبلی" type="button">➔</button>
@@ -272,22 +272,22 @@
 <span class="compact-school-title">مدرسه آموزش از راه دور اترک</span>
 </div>
 </div>
-
+ 
 <main aria-label="محتوای اصلی سایت" aria-live="polite" class="main-wrapper" id="mainAppContent"></main>
-
+ 
 <button aria-label="بازگشت به ابتدای صفحه" class="floating-top-button" id="floatingTopButton" onclick="scrollToPageTop()" title="بازگشت به ابتدای صفحه" type="button">
 <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" aria-hidden="true">
 <path d="M12 19V5"></path>
 <path d="M6 11l6-6 6 6"></path>
 </svg>
 </button>
-
+ 
 <div class="chat-toggle-floating" onclick="toggleChatModal()" title="پشتیبانی آنلاین">
 <svg fill="none" height="26" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="26">
 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
 </svg>
 </div>
-
+ 
 <div class="chat-modal-window" id="chatModal">
 <div class="chat-header-bar">
 <div class="chat-header-shapes">
@@ -312,7 +312,7 @@
 <button class="chat-send-btn" aria-label="ارسال پیام" onclick="sendChatMessage()" type="button">➤</button>
 </div>
 </div>
-
+ 
 <footer class="main-footer" aria-label="پاورقی سایت">
 <div class="footer-content">
 <div class="footer-info-col">
@@ -336,16 +336,16 @@
 </div>
 </div>
 </footer>
-
+ 
 <div class="copyright-bar">
 <svg class="inline-icon topic-icon-svg" onclick="openIconPicker(event, this)" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M15 9.35a4 4 0 1 0 0 5.3"></path></svg>
 <span data-editable="copyright-text">تمامی حقوق این وب سایت متعلق به مدرسه آموزش از راه دور اترک میباشد</span>
 </div>
-
+ 
 <div aria-live="polite" id="studentLmsAccessNotice" role="status">
 <span>اکنون شما میتوانید از بخش سامانه محتوی (LMS) استفاده کنید</span>
 </div>
-
+ 
 <!-- Modals -->
 <div class="modal-overlay" id="studentLoginModal">
 <div class="modal-box">
@@ -361,7 +361,7 @@
 <div id="studentLoginError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;"></div>
 </div>
 </div>
-
+ 
 <div class="modal-overlay" id="passwordModal">
 <div class="modal-box">
 <h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">ورود به سامانه دریافت جزوات و فیلم‌ها</h3>
@@ -374,7 +374,7 @@
 <div id="passcodeError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;">رمز عبور نادرست است!</div>
 </div>
 </div>
-
+ 
 <div class="modal-overlay" id="adminLoginModal">
 <div class="modal-box">
 <h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">ورود به پنل مدیریت سایت اترک</h3>
@@ -388,7 +388,7 @@
 <div id="adminCodeError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;">کد امنیتی مدیریت نامعتبر است!</div>
 </div>
 </div>
-
+ 
 <div class="modal-overlay" id="iconPickerModal">
 <div class="modal-box" style="width: min(650px, 95vw); max-height: 85vh; display: flex; flex-direction: column;">
 <h3 style="font-size:18px; color:var(--primary-purple); margin-bottom:10px;">انتخاب آیکون (کتابخانه ۱۰۰ آیکون متنوع و کاملاً غیرتکراری)</h3>
@@ -400,10 +400,10 @@
 </div>
 </div>
 </div>
-
+ 
 <!-- استایل اختصاصی چت‌باکس مشاوره -->
 <style>
- .form-chat-wrapper {
+.form-chat-wrapper {
     position: fixed;
     bottom: 178px;
     right: 28px;
@@ -423,7 +423,7 @@
     animation: chatPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .form-chat-wrapper.active { display: flex; }
-
+ 
 .form-chat-header {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #ffffff;
@@ -445,22 +445,22 @@
     line-height: 1;
     padding: 4px;
 }
-
+ 
   .form-chat-header .chat-icon {
     width: 24px;
     height: 24px;
     fill: #ffffff;
   }
-
+ 
   #form-chat-logs {
-flex: 1;
+   flex: 1;
     overflow-y: auto;
     padding: 12px;
     background-color: #f4f6f9;
     display: flex;
     flex-direction: column;
   }
-
+ 
   .form-msg {
     margin-bottom: 8px;
     padding: 8px 12px;
@@ -469,27 +469,27 @@ flex: 1;
     line-height: 1.5;
     max-width: 85%;
   }
-
+ 
   .form-msg-system {
     background-color: #ffffff;
     color: #333333;
     border: 1px solid #e2e8f0;
     align-self: flex-start;
   }
-
+ 
   .form-msg-user {
     background-color: #2575fc;
     color: #ffffff;
     align-self: flex-end;
     text-align: right;
   }
-
+ 
   #form-chat-controls {
     padding: 10px;
     background-color: #ffffff;
     border-top: 1px solid #eeeeee;
   }
-
+ 
   #form-chat-controls input {
     width: 100%;
     padding: 8px;
@@ -499,7 +499,7 @@ flex: 1;
     box-sizing: border-box;
     font-size: 12px;
   }
-
+ 
   #form-chat-controls button {
     width: 100%;
     padding: 8px;
@@ -512,18 +512,18 @@ flex: 1;
     font-size: 12px;
     transition: background 0.2s;
   }
-
+ 
   #form-chat-controls button:hover {
     background-color: #2575fc;
   }
 </style>
-
+ 
 <div class="consultation-toggle-floating" onclick="toggleConsultationModal()" title="مشاوره">
 <svg fill="none" height="26" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="26">
 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
 </svg>
 </div>
-
+ 
 <div class="form-chat-wrapper" id="consultationModal">
   <div class="form-chat-header">
     <svg class="chat-icon" viewBox="0 0 24 24">
@@ -535,17 +535,17 @@ flex: 1;
   <div id="form-chat-logs"></div>
   <div id="form-chat-controls"></div>
 </div>
-
+ 
 <script>
   function toggleConsultationModal() {
     const panel = document.getElementById('consultationModal');
     if (panel) panel.classList.toggle('active');
   }
 </script>
-
+ 
 <!-- کتابخانه‌های خارجی -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+ 
 <!-- اسکریپت‌های پروژه (به ترتیب نیاز) -->
 <script src="fixes.js"></script>
 <script src="icons.js"></script>
@@ -555,11 +555,9 @@ flex: 1;
 <script src="news.js"></script>
 <script src="comments.js"></script>
 <script src="honors.js"></script>
-
-
+ 
 <!-- فایل دیتابیس -->
 <script src="supabase.js"></script>
-
 <!-- فراخوانی ماژول چت جدید از پوشه اصلاح‌شده (chat) -->
 <script type="module">
   import { initFormChat } from './chat.js';
@@ -567,6 +565,6 @@ flex: 1;
     initFormChat();
   });
 </script>
-
+ 
 </body>
 </html>
