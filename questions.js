@@ -59,9 +59,9 @@ function saveAllQuestionsData(data) {
             JSON.stringify(data)
         );
 
-        if (typeof syncStateToCloud === 'function') {
-            syncStateToCloud();
-        }
+        // دیگر بانک سوالات را داخل رکورد اصلی سایت
+        // ذخیره نمی‌کنیم.
+        // ذخیره ابری هر درس جداگانه انجام می‌شود.
 
         return true;
 
@@ -73,7 +73,7 @@ function saveAllQuestionsData(data) {
         );
 
         alert(
-            'ذخیره سوالات انجام نشد.'
+            'ذخیره سوالات روی این دستگاه انجام نشد.'
         );
 
         return false;
@@ -135,11 +135,28 @@ function saveLessonQuestions(
     allData[lessonId] =
         lessonQuestions;
 
-    return saveAllQuestionsData(
-        allData
-    );
-}
+    const savedLocally =
+        saveAllQuestionsData(
+            allData
+        );
 
+    if (
+        savedLocally &&
+        typeof saveQuestionsLessonToCloud === 'function' &&
+        typeof state !== 'undefined' &&
+        state &&
+        state.isAdmin === true
+    ) {
+
+        // هر درس جداگانه در Supabase ذخیره می‌شود
+        saveQuestionsLessonToCloud(
+            lessonId,
+            lessonQuestions
+        );
+    }
+
+    return savedLocally;
+}
 
 /* =========================================================
    عنوان دسته سوال
