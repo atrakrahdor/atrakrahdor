@@ -56,7 +56,6 @@ async function syncStateToCloud() {
             components: localStorage.getItem('atrak_dynamic_elements_v1') || '[]',
             comments_v39: localStorage.getItem('atrak_comments_v39') || '[]',
                       honors: localStorage.getItem('atrak_honors_v1') || '[]',
-            questions: localStorage.getItem('atrak_questions_v1') || '{}',
             updatedAt: updatedAt
         };
 
@@ -168,21 +167,55 @@ async function startAtrakRealtime() {
                     scheduleRealtimeSiteRefresh();
                 }
             )
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'site_state',
-                    filter: `id=eq.${ATRAK_QBANK_ROW_ID}`
-                },
-                () => {
-                    if (typeof state !== 'undefined' && state && state.isAdmin === true) return;
-                    loadQuestionsBankFromCloud().then(() => {
-                        try { renderCurrentView(); } catch (e) {}
-                    });
-                }
+.on(
+    'postgres_changes',
+    {
+        event: '*',
+        schema: 'public',
+        table: 'site_state'
+    },
+    (payload) => {
+
+        const changedId =
+            payload &&
+            payload.new &&
+            payload.new.id;
+
+        if (
+            typeof changedId !== 'string'
+        ) {
+            return;
+        }
+
+        // فقط تغییرات مربوط به بانک سوالات
+        if (
+            !changedId.startsWith(
+                'questions_lesson_'
             )
+        ) {
+            return;
+        }
+
+        // مدیر تغییر خودش را دوباره از Cloud دریافت نکند
+        if (
+            typeof state !== 'undefined' &&
+            state &&
+            state.isAdmin === true
+        ) {
+            return;
+        }
+
+        loadQuestionsBankFromCloud()
+            .then(() => {
+
+                try {
+                    renderCurrentView();
+                } catch (e) {}
+
+            });
+
+    }
+)
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') {
                     console.log('✅ Supabase Realtime فعال شد!');
@@ -243,9 +276,7 @@ async function loadMainStateFromCloud() {
         if (typeof data.honors === 'string') {
             localStorage.setItem('atrak_honors_v1', data.honors);
         }
-        if (typeof data.questions === 'string') {
-            localStorage.setItem('atrak_questions_v1', data.questions);
-        }
+
         if (typeof data.iconColor === 'string') {
             localStorage.setItem('atrak_icon_color', data.iconColor);
         }
@@ -262,184 +293,297 @@ async function loadMainStateFromCloud() {
 
 
 // =========================================================
-// بانک سوالات (متن کتاب / نوبت اول / نوبت دوم)
-// -------------------------------------------------------
-// سوالات در چند کلید localStorage ذخیره می‌شوند که قبلاً به Cloud
-// وصل نبودند. اینجا هر تغییر روی این کلیدها خودکار در یک ردیف جدا
-// (site_state با id = questions_bank) ذخیره می‌شود تا:
-//   1) برای همه کاربران نمایش داده شود
-//   2) حجم زیاد، ردیف اصلی سایت را خراب نکند
-//   3) اگر حافظه مرورگر پر بود، ذخیره باز هم انجام شود
+// بانک سوالات مستقل
+// هر درس در یک رکورد جداگانه Supabase ذخیره می‌شود.
 // =========================================================
-const ATRAK_QBANK_ROW_ID = 'questions_bank';
-const ATRAK_QBANK_KEYS = [
-    'atrak_questions_v1',
-    'atrak_middle1_questions',
-    'MIDDLE1_QUESTIONS_FINAL_V3',
-    'atrak_question_chapter_settings'
-];
-const ATRAK_QBANK_DIRTY = 'atrak_qbank_dirty';
 
-const atrakQbankMemory = {};
-let atrakQbankApplying = false;
-let atrakQbankTimer = null;
-let atrakQbankQueue = Promise.resolve();
-let atrakQbankAlerted = false;
+const ATRAK_QLESSON_PREFIX =
+    'questions_lesson_';
 
-(function patchQuestionStorage() {
-    const nativeSet = Storage.prototype.setItem;
-    const nativeGet = Storage.prototype.getItem;
+let atrakQuestionsCloudQueue =
+    Promise.resolve();
 
-    function isQbankKey(storage, key) {
-        return storage === window.localStorage &&
-            ATRAK_QBANK_KEYS.indexOf(String(key)) !== -1;
+function getQuestionsLessonRowId(lessonId) {
+
+    return (
+        ATRAK_QLESSON_PREFIX +
+        encodeURIComponent(
+            String(lessonId)
+        )
+    );
+}
+
+
+// =========================================================
+// ذخیره سوالات یک درس
+// =========================================================
+
+async function saveQuestionsLessonToCloud(
+    lessonId,
+    lessonQuestions
+) {
+
+    if (!isCloudStorageConfigured()) {
+        return false;
     }
 
-    Storage.prototype.setItem = function (key, value) {
-        if (!isQbankKey(this, key)) {
-            return nativeSet.call(this, key, value);
-        }
+    if (!atrakIsAdminNow()) {
+        return false;
+    }
 
-        const text = String(value);
-        try {
-            nativeSet.call(this, key, text);
-            delete atrakQbankMemory[key];
-        } catch (error) {
-            // حافظه مرورگر پر است؛ مقدار در حافظه موقت نگه داشته می‌شود
-            // و به Cloud ارسال خواهد شد.
-            atrakQbankMemory[key] = text;
-            console.warn('localStorage پر است؛ سوالات فقط در Cloud ذخیره می‌شوند.', error);
-        }
+    const rowId =
+        getQuestionsLessonRowId(
+            lessonId
+        );
 
-        if (!atrakQbankApplying) {
-            atrakScheduleQuestionsPush();
-        }
-    };
+    atrakQuestionsCloudQueue =
+        atrakQuestionsCloudQueue.then(
+            async () => {
 
-    Storage.prototype.getItem = function (key) {
-        if (isQbankKey(this, key) &&
-            Object.prototype.hasOwnProperty.call(atrakQbankMemory, key)) {
-            return atrakQbankMemory[key];
-        }
-        return nativeGet.call(this, key);
-    };
-})();
+                const response =
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/site_state?on_conflict=id`,
+                        {
+                            method: 'POST',
 
-function atrakIsAdminNow() {
-    return typeof state !== 'undefined' && state && state.isAdmin === true;
-}
+                            headers:
+                                getSupabaseWriteHeaders(),
 
-function atrakScheduleQuestionsPush() {
-    if (!isCloudStorageConfigured() || !atrakIsAdminNow()) return;
+                            body:
+                                JSON.stringify({
 
-    try { localStorage.setItem(ATRAK_QBANK_DIRTY, '1'); } catch (e) {}
+                                    id: rowId,
 
-    clearTimeout(atrakQbankTimer);
-    atrakQbankTimer = setTimeout(pushQuestionsBankToCloud, 800);
-}
+                                    data: {
 
-function pushQuestionsBankToCloud() {
-    if (!isCloudStorageConfigured() || !atrakIsAdminNow()) return Promise.resolve();
+                                        schemaVersion: 2,
 
-    atrakQbankQueue = atrakQbankQueue.then(async () => {
-        const items = {};
-        ATRAK_QBANK_KEYS.forEach((key) => {
-            const value = localStorage.getItem(key);
-            if (typeof value === 'string') items[key] = value;
-        });
+                                        lessonId:
+                                            String(
+                                                lessonId
+                                            ),
 
-        const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/site_state?on_conflict=id`,
-            {
-                method: 'POST',
-                headers: getSupabaseWriteHeaders(),
-                body: JSON.stringify({
-                    id: ATRAK_QBANK_ROW_ID,
-                    data: {
-                        schemaVersion: 1,
-                        updatedAt: String(Date.now()),
-                        items: items
-                    }
-                })
+                                        updatedAt:
+                                            String(
+                                                Date.now()
+                                            ),
+
+                                        questions:
+                                            lessonQuestions
+
+                                    }
+
+                                })
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    const details =
+                        await response
+                            .text()
+                            .catch(() => '');
+
+                    throw new Error(
+                        `ذخیره سوالات درس ناموفق بود: ${response.status} ${details}`
+                    );
+                }
+
             }
         );
 
-        if (!response.ok) {
-            const details = await response.text().catch(() => '');
-            throw new Error(`${response.status} ${details}`);
-        }
-
-        try { localStorage.removeItem(ATRAK_QBANK_DIRTY); } catch (e) {}
-        atrakQbankAlerted = false;
-    }).catch((error) => {
-        console.error('خطا در ذخیره آنلاین بانک سوالات:', error);
-        if (!atrakQbankAlerted) {
-            atrakQbankAlerted = true;
-            alert(
-                'سوالات روی این دستگاه ذخیره شد اما در سرور ذخیره نشد، ' +
-                'پس برای بقیه کاربران دیده نمی‌شود.\n\n' +
-                'جزئیات خطا: ' + (error && error.message ? error.message : error)
-            );
-        }
-    });
-
-    return atrakQbankQueue;
-}
-
-async function loadQuestionsBankFromCloud() {
-    if (!isCloudStorageConfigured()) return;
-
     try {
-        const timeout = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Questions load timeout')), 5000);
-        });
 
-        const response = await Promise.race([
-            fetch(
-                `${SUPABASE_URL}/rest/v1/site_state?id=eq.${ATRAK_QBANK_ROW_ID}&select=data`,
-                { headers: { apikey: SUPABASE_ANON_KEY } }
-            ),
-            timeout
-        ]);
+        await atrakQuestionsCloudQueue;
 
-        if (!response.ok) return;
+        console.log(
+            '✅ سوالات این درس در Cloud ذخیره شد:',
+            lessonId
+        );
 
-        const rows = await response.json();
-        const items = rows[0] && rows[0].data && rows[0].data.items;
-        const isAdmin = atrakIsAdminNow();
+        return true;
 
-        // مدیر: اگر تغییر ذخیره‌نشده دارد، آن را به Cloud بفرست و رونویسی نکن
-        let dirty = false;
-        try { dirty = localStorage.getItem(ATRAK_QBANK_DIRTY) === '1'; } catch (e) {}
-        if (isAdmin && dirty) {
-            atrakScheduleQuestionsPush();
-            return;
-        }
-
-        if (!items || typeof items !== 'object') {
-            // هنوز چیزی در Cloud نیست: سوالات موجود مدیر را یک بار آپلود کن
-            if (isAdmin && ATRAK_QBANK_KEYS.some((k) => localStorage.getItem(k))) {
-                atrakScheduleQuestionsPush();
-            }
-            return;
-        }
-
-        atrakQbankApplying = true;
-        try {
-            ATRAK_QBANK_KEYS.forEach((key) => {
-                if (typeof items[key] === 'string') {
-                    localStorage.setItem(key, items[key]);
-                }
-            });
-        } finally {
-            atrakQbankApplying = false;
-        }
     } catch (error) {
-        console.error('خطا در دریافت بانک سوالات:', error);
+
+        console.error(
+            '❌ خطا در ذخیره آنلاین سوالات:',
+            error
+        );
+
+        alert(
+            'سوال روی این دستگاه ذخیره شد، ' +
+            'اما ذخیره آن در سرور انجام نشد.\n\n' +
+            'جزئیات خطا:\n' +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : error
+            )
+        );
+
+        return false;
     }
 }
 
+
+// =========================================================
+// دریافت تمام سوالات از Cloud
+// =========================================================
+
+async function loadQuestionsBankFromCloud() {
+
+    if (!isCloudStorageConfigured()) {
+        return;
+    }
+
+    try {
+
+        const params =
+            new URLSearchParams();
+
+        params.set(
+            'select',
+            'id,data'
+        );
+
+        params.set(
+            'id',
+            `like.${ATRAK_QLESSON_PREFIX}*`
+        );
+
+        const response =
+            await fetch(
+                `${SUPABASE_URL}/rest/v1/site_state?${params.toString()}`,
+                {
+                    headers: {
+                        apikey:
+                            SUPABASE_ANON_KEY
+                    }
+                }
+            );
+
+        if (!response.ok) {
+
+            const details =
+                await response
+                    .text()
+                    .catch(() => '');
+
+            throw new Error(
+                `دریافت سوالات ناموفق بود: ${response.status} ${details}`
+            );
+        }
+
+        const rows =
+            await response.json();
+
+        if (
+            !Array.isArray(rows) ||
+            rows.length === 0
+        ) {
+
+            console.log(
+                'هنوز بانک سوالات جدید در Cloud وجود ندارد.'
+            );
+
+            return;
+        }
+
+
+        let allQuestions = {};
+
+        try {
+
+            const local =
+                localStorage.getItem(
+                    'atrak_questions_v1'
+                );
+
+            if (local) {
+
+                allQuestions =
+                    JSON.parse(local) || {};
+
+            }
+
+        } catch (error) {
+
+            allQuestions = {};
+
+        }
+
+
+        rows.forEach(function(row) {
+
+            const data =
+                row &&
+                row.data;
+
+            if (
+                !data ||
+                typeof data !== 'object'
+            ) {
+                return;
+            }
+
+            const lessonId =
+                String(
+                    data.lessonId || ''
+                );
+
+            if (!lessonId) {
+                return;
+            }
+
+            if (
+                data.questions &&
+                typeof data.questions === 'object'
+            ) {
+
+                allQuestions[
+                    lessonId
+                ] =
+                    data.questions;
+
+            }
+
+        });
+
+
+        localStorage.setItem(
+            'atrak_questions_v1',
+            JSON.stringify(
+                allQuestions
+            )
+        );
+
+
+        console.log(
+            '✅ بانک سوالات از Cloud دریافت شد.'
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            '❌ خطا در دریافت بانک سوالات:',
+            error
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// دریافت کل وضعیت سایت
+// =========================================================
+
 async function loadStateFromCloud() {
+
     await loadMainStateFromCloud();
+
     await loadQuestionsBankFromCloud();
+
 }
