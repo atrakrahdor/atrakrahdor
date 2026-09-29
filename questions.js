@@ -5169,57 +5169,74 @@ window.addEventListener(
        ذخیره سوالات
        --------------------------------------------------------- */
 
-    window.finalSaveLessonQuestions = function (
-        lessonKey,
-        category,
-        questions
+   window.finalSaveLessonQuestions = function (
+    lessonKey,
+    category,
+    questions
+) {
+
+    const safeCategory =
+        normalizeCategory(category);
+
+    const data =
+        getAllQuestions();
+
+    const lesson =
+        createLessonStructure(
+            data,
+            lessonKey
+        );
+
+    lesson[safeCategory] =
+        Array.isArray(questions)
+            ? questions.map(function (item) {
+
+                if (typeof item === 'string') {
+                    return {
+                        text: item
+                    };
+                }
+
+                return {
+                    text: String(
+                        item && item.text
+                            ? item.text
+                            : ''
+                    )
+                };
+
+            }).filter(function (item) {
+
+                return item.text.trim() !== '';
+
+            })
+            : [];
+
+    // اول روی همین دستگاه ذخیره شود
+    const localSaved =
+        saveAllQuestions(data);
+
+    if (!localSaved) {
+        return false;
+    }
+
+    // سپس فقط همین درس به Cloud فرستاده شود
+    if (
+        typeof saveLmsLessonToCloud === 'function' &&
+        typeof state !== 'undefined' &&
+        state &&
+        state.isAdmin === true
     ) {
 
-        const safeCategory =
-            normalizeCategory(category);
+        saveLmsLessonToCloud(
+            lessonKey,
+            data[lessonKey]
+        );
 
-        const data =
-            getAllQuestions();
+    }
 
-        const lesson =
-            createLessonStructure(
-                data,
-                lessonKey
-            );
-
-        lesson[safeCategory] =
-            Array.isArray(questions)
-                ? questions.map(function (item) {
-
-                    if (
-                        typeof item === 'string'
-                    ) {
-                        return {
-                            text: item
-                        };
-                    }
-
-                    return {
-                        text:
-                            String(
-                                item &&
-                                item.text
-                                    ? item.text
-                                    : ''
-                            )
-                    };
-
-                }).filter(function (item) {
-
-                    return (
-                        item.text.trim() !== ''
-                    );
-
-                })
-                : [];
-
-        return saveAllQuestions(data);
-    };
+    return true;
+};
 
 
     /* ---------------------------------------------------------
