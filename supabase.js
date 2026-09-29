@@ -587,3 +587,215 @@ async function loadStateFromCloud() {
     await loadQuestionsBankFromCloud();
 
 }
+// =========================================================
+// LMS QUESTIONS CLOUD STORAGE
+// هر درس جداگانه ذخیره می‌شود
+// =========================================================
+
+const LMS_QUESTIONS_PREFIX =
+    'lms_questions_';
+
+let lmsQuestionsSaveQueue =
+    Promise.resolve();
+
+
+function getLmsQuestionRowId(lessonKey) {
+
+    return (
+        LMS_QUESTIONS_PREFIX +
+        encodeURIComponent(
+            String(lessonKey)
+        )
+    );
+}
+
+
+function saveLmsLessonToCloud(
+    lessonKey,
+    lessonData
+) {
+
+    if (!isCloudStorageConfigured()) {
+        return Promise.resolve(false);
+    }
+
+    if (
+        typeof state === 'undefined' ||
+        !state ||
+        state.isAdmin !== true
+    ) {
+        return Promise.resolve(false);
+    }
+
+    const rowId =
+        getLmsQuestionRowId(
+            lessonKey
+        );
+
+    lmsQuestionsSaveQueue =
+        lmsQuestionsSaveQueue.then(
+            async function () {
+
+                const payload = {
+
+                    id: rowId,
+
+                    data: {
+
+                        schemaVersion: 1,
+
+                        lessonKey:
+                            String(
+                                lessonKey
+                            ),
+
+                        updatedAt:
+                            String(
+                                Date.now()
+                            ),
+
+                        questions:
+                            lessonData || {}
+
+                    }
+
+                };
+
+                const response =
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/site_state?on_conflict=id`,
+                        {
+                            method: 'POST',
+
+                            headers:
+                                getSupabaseWriteHeaders(),
+
+                            body:
+                                JSON.stringify(
+                                    payload
+                                )
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    const details =
+                        await response
+                            .text()
+                            .catch(
+                                function () {
+                                    return '';
+                                }
+                            );
+
+                    throw new Error(
+                        'LMS cloud save failed: ' +
+                        response.status +
+                        ' ' +
+                        details
+                    );
+                }
+
+                console.log(
+                    '✅ سوالات درس در Cloud ذخیره شد:',
+                    lessonKey
+                );
+
+                return true;
+            }
+        );
+
+    return lmsQuestionsSaveQueue
+        .catch(function (error) {
+
+            console.error(
+                '❌ خطای ذخیره سوالات LMS:',
+                error
+            );
+
+            alert(
+                'سوالات روی دستگاه ذخیره شدند، ' +
+                'اما ذخیره آنلاین انجام نشد.\n\n' +
+                error.message
+            );
+
+            return false;
+        });
+}
+
+
+// =========================================================
+// دریافت سوالات یک درس از Cloud
+// =========================================================
+
+async function loadLmsLessonFromCloud(
+    lessonKey
+) {
+
+    if (!isCloudStorageConfigured()) {
+        return null;
+    }
+
+    try {
+
+        const rowId =
+            getLmsQuestionRowId(
+                lessonKey
+            );
+
+        const response =
+            await fetch(
+                `${SUPABASE_URL}/rest/v1/site_state?id=eq.${encodeURIComponent(rowId)}&select=data`,
+                {
+                    headers: {
+                        apikey:
+                            SUPABASE_ANON_KEY
+                    }
+                }
+            );
+
+        if (!response.ok) {
+
+            console.error(
+                'خطا در دریافت سوالات LMS:',
+                response.status
+            );
+
+            return null;
+        }
+
+        const rows =
+            await response.json();
+
+        if (
+            !Array.isArray(rows) ||
+            !rows.length
+        ) {
+            return null;
+        }
+
+        const data =
+            rows[0] &&
+            rows[0].data;
+
+        if (
+            !data ||
+            typeof data !== 'object'
+        ) {
+            return null;
+        }
+
+        return (
+            data.questions || null
+        );
+
+    } catch (error) {
+
+        console.error(
+            'خطا در دریافت سوالات LMS:',
+            error
+        );
+
+        return null;
+    }
+}
