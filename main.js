@@ -8295,7 +8295,7 @@ function showLessonContent(lessonName, lessonId) {
    باز کردن یک درس داخلی
    ========================================================= */
 
-function openQuestionChapter(
+async function openQuestionChapter(
     chapterId,
     chapterTitle,
     category,
@@ -8325,10 +8325,26 @@ function openQuestionChapter(
 
 
     /* =========================================
-       دریافت اطلاعات ذخیره‌شده
+       دریافت اطلاعات ذخیره‌شده از Cloud
+       (localStorage برای بانک سوالات استفاده نمی‌شود)
     ========================================= */
 
-    let data = getLessonQuestions(chapterId);
+    try {
+        if (typeof loadQuestionsLessonFromCloud === 'function') {
+            const cloudQuestions = await loadQuestionsLessonFromCloud(chapterId);
+            if (cloudQuestions && typeof cloudQuestions === 'object') {
+                data = cloudQuestions;
+            } else {
+                data = getLessonQuestions(chapterId);
+            }
+        } else {
+            data = getLessonQuestions(chapterId);
+        }
+    } catch (error) {
+        console.error('دریافت سوالات این درس ناموفق بود:', error);
+        alert('سوالات این درس از سرور دریافت نشد.\n\n' + error.message);
+        return;
+    }
 
     if (!data || typeof data !== 'object') {
         data = {};
@@ -8349,7 +8365,7 @@ function openQuestionChapter(
             }
         ];
 
-        saveLessonQuestions(
+        await saveLessonQuestions(
             chapterId,
             data
         );
@@ -8370,7 +8386,7 @@ function openQuestionChapter(
             }
         ];
 
-        saveLessonQuestions(
+        await saveLessonQuestions(
             chapterId,
             data
         );
