@@ -9124,16 +9124,18 @@ window.addEventListener('storage', function (event) {
                     Authorization: 'Bearer ' + token
                 };
 
-                let adminResponse = await fetch(
-                    SUPABASE_URL + '/rest/v1/admins?user_id=eq.' +
-                    encodeURIComponent(user.id) +
-                    '&select=id&limit=1',
-                    { headers: adminHeaders }
-                );
+let adminResponse = await fetch(
+    SUPABASE_URL + '/rest/v1/admins?user_id=eq.' +
+    encodeURIComponent(user.id) +
+    '&select=user_id&limit=1',
+    {
+        headers: adminHeaders
+    }
+);
 
-                let rows = adminResponse.ok
-                    ? await adminResponse.json()
-                    : [];
+const rows = adminResponse.ok
+    ? await adminResponse.json()
+    : [];
 
                 if (!adminResponse.ok) {
                     adminResponse = await fetch(
