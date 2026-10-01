@@ -18,29 +18,13 @@ const QUESTION_STORAGE_KEY = 'atrak_questions_v1';
 ========================================================= */
 
 function getAllQuestionsData() {
-
     try {
-
-        const saved =
-            localStorage.getItem(QUESTION_STORAGE_KEY);
-
-        if (!saved) {
-            return {};
-        }
-
-        const data = JSON.parse(saved);
-
+        const data = window.__atrakQuestionsCloudCache || {};
         return data && typeof data === 'object'
             ? data
             : {};
-
     } catch (error) {
-
-        console.error(
-            'خطا در خواندن سوالات:',
-            error
-        );
-
+        console.error('خطا در خواندن سوالات:', error);
         return {};
     }
 }
@@ -51,31 +35,11 @@ function getAllQuestionsData() {
 ========================================================= */
 
 function saveAllQuestionsData(data) {
-
     try {
-
-        localStorage.setItem(
-            QUESTION_STORAGE_KEY,
-            JSON.stringify(data)
-        );
-
-        // دیگر بانک سوالات را داخل رکورد اصلی سایت
-        // ذخیره نمی‌کنیم.
-        // ذخیره ابری هر درس جداگانه انجام می‌شود.
-
+        window.__atrakQuestionsCloudCache = data || {};
         return true;
-
     } catch (error) {
-
-        console.error(
-            'خطا در ذخیره سوالات:',
-            error
-        );
-
-        alert(
-            'ذخیره سوالات روی این دستگاه انجام نشد.'
-        );
-
+        console.error('خطا در ذخیره موقت سوالات:', error);
         return false;
     }
 }
@@ -124,39 +88,28 @@ function getLessonQuestions(lessonId) {
    ذخیره سوالات یک درس
 ========================================================= */
 
-function saveLessonQuestions(
+async function saveLessonQuestions(
     lessonId,
     lessonQuestions
 ) {
+    const allData = getAllQuestionsData();
 
-    const allData =
-        getAllQuestionsData();
+    allData[String(lessonId)] = lessonQuestions;
+    saveAllQuestionsData(allData);
 
-    allData[lessonId] =
-        lessonQuestions;
-
-    const savedLocally =
-        saveAllQuestionsData(
-            allData
-        );
-
-    if (
-        savedLocally &&
-        typeof saveQuestionsLessonToCloud === 'function' &&
-        typeof state !== 'undefined' &&
-        state &&
-        state.isAdmin === true
-    ) {
-
-        // هر درس جداگانه در Supabase ذخیره می‌شود
-        saveQuestionsLessonToCloud(
+    // منبع اصلی ذخیره، Cloud است؛ localStorage استفاده نمی‌شود.
+    if (typeof saveQuestionsLessonToCloud === 'function') {
+        await saveQuestionsLessonToCloud(
             lessonId,
             lessonQuestions
         );
+    } else {
+        throw new Error('تابع ذخیره Cloud سوالات بارگذاری نشده است.');
     }
 
-    return savedLocally;
+    return true;
 }
+
 
 /* =========================================================
    عنوان دسته سوال
@@ -316,7 +269,7 @@ function openQuestionAdminPanel() {
    نمایش پنل مدیریت
 ========================================================= */
 
-function showQuestionAdminPanel(
+async function showQuestionAdminPanel(
     lessonId,
     lessonName
 ) {
@@ -343,6 +296,17 @@ function showQuestionAdminPanel(
         );
     }
 
+
+    // همیشه نسخه سرور همین درس را بگیر؛ نسخه مرورگر منبع اصلی نیست.
+    try {
+        if (typeof loadQuestionsLessonFromCloud === 'function') {
+            await loadQuestionsLessonFromCloud(lessonId);
+        }
+    } catch (error) {
+        console.error('دریافت سوالات این درس از Cloud ناموفق بود:', error);
+        alert('دریافت سوالات از سرور انجام نشد. اتصال اینترنت و Supabase را بررسی کنید.\n\n' + error.message);
+        return;
+    }
 
     const questions =
         getLessonQuestions(
@@ -1262,7 +1226,7 @@ function openQuestionEditor(
    سازگار با متن کتاب / نوبت اول / نوبت دوم
 ========================================================= */
 
-function saveQuestionFromEditor(
+async function saveQuestionFromEditor(
     lessonId,
     lessonName,
     category,
@@ -1532,21 +1496,25 @@ function saveQuestionFromEditor(
        ذخیره دائمی
     ===================================================== */
 
-    const saved =
-        saveLessonQuestions(
+    let saved = false;
+
+    try {
+        saved = await saveLessonQuestions(
             lessonId,
             lessonQuestions
         );
-
+    } catch (error) {
+        console.error('ذخیره سوال ناموفق بود:', error);
+        alert(
+            'ذخیره سوال در سرور انجام نشد.\n\n' +
+            (error && error.message ? error.message : error)
+        );
+        return;
+    }
 
     if (!saved) {
-
-        alert(
-            'ذخیره سوال انجام نشد.'
-        );
-
+        alert('ذخیره سوال انجام نشد.');
         return;
-
     }
 
 
@@ -1589,7 +1557,7 @@ function saveQuestionFromEditor(
    حذف سوال
 ========================================================= */
 
-function deleteQuestion(
+async function deleteQuestion(
     lessonId,
     category,
     questionId,
@@ -1624,19 +1592,22 @@ function deleteQuestion(
         );
 
 
-    if (
-        saveLessonQuestions(
+    try {
+        const saved = await saveLessonQuestions(
             lessonId,
             lessonQuestions
-        )
-    ) {
-
-        renderQuestionAdminCategory(
-            lessonId,
-            lessonName,
-            category
         );
 
+        if (saved) {
+                renderQuestionAdminCategory(
+                lessonId,
+                lessonName,
+                category
+            );
+        }
+    } catch (error) {
+        console.error('حذف سوال ناموفق بود:', error);
+        alert('حذف سوال در سرور انجام نشد.\n\n' + (error && error.message ? error.message : error));
     }
 }
 
@@ -5169,7 +5140,7 @@ window.addEventListener(
        ذخیره سوالات
        --------------------------------------------------------- */
 
-   window.finalSaveLessonQuestions = function (
+window.finalSaveLessonQuestions = function (
     lessonKey,
     category,
     questions
