@@ -8323,6 +8323,7 @@ async function openQuestionChapter(
     window.currentLessonName = parentLessonName;
     window.currentQuestionCategory = category;
 
+    let data = {};
 
     /* =========================================
        دریافت اطلاعات ذخیره‌شده از Cloud
@@ -8334,11 +8335,7 @@ async function openQuestionChapter(
             const cloudQuestions = await loadQuestionsLessonFromCloud(parentLessonId);
             if (cloudQuestions && typeof cloudQuestions === 'object') {
                 data = cloudQuestions;
-            } else {
-                data = getLessonQuestions(chapterId);
             }
-        } else {
-            data = getLessonQuestions(chapterId);
         }
     } catch (error) {
         console.error('دریافت سوالات این درس ناموفق بود:', error);
@@ -8356,41 +8353,17 @@ async function openQuestionChapter(
     ========================================= */
 
     if (!Array.isArray(data[category])) {
-
-        data[category] = [
-            {
-                id: 'point_' + chapterId,
-                question: '.',
-                answer: ''
-            }
-        ];
-
-saveLessonQuestions(
-    parentLessonId,
-    data
-);
+        data[category] = [];
     }
+
 
 
     /* =========================================
        اگر آرایه خالی است
     ========================================= */
 
-    if (data[category].length === 0) {
+    // آرایه خالی عمداً بدون ساختن سؤالِ نقطه‌ای نگه داشته می‌شود.
 
-        data[category] = [
-            {
-                id: 'point_' + chapterId,
-                question: '.',
-                answer: ''
-            }
-        ];
-
-saveLessonQuestions(
-    parentLessonId,
-    data
-);
-    }
 
 
     /* =========================================
@@ -9124,31 +9097,16 @@ window.addEventListener('storage', function (event) {
                     Authorization: 'Bearer ' + token
                 };
 
-let adminResponse = await fetch(
-    SUPABASE_URL + '/rest/v1/admins?user_id=eq.' +
-    encodeURIComponent(user.id) +
-    '&select=user_id&limit=1',
-    {
-        headers: adminHeaders
-    }
-);
+                const adminResponse = await fetch(
+                    SUPABASE_URL + '/rest/v1/admins?user_id=eq.' +
+                    encodeURIComponent(user.id) +
+                    '&select=user_id&limit=1',
+                    { headers: adminHeaders }
+                );
 
-const rows = adminResponse.ok
-    ? await adminResponse.json()
-    : [];
-
-                if (!adminResponse.ok) {
-                    adminResponse = await fetch(
-                        SUPABASE_URL + '/rest/v1/admins?id=eq.' +
-                        encodeURIComponent(user.id) +
-                        '&select=id&limit=1',
-                        { headers: adminHeaders }
-                    );
-
-                    rows = adminResponse.ok
-                        ? await adminResponse.json()
-                        : [];
-                }
+                const rows = adminResponse.ok
+                    ? await adminResponse.json()
+                    : [];
 
                 if (!Array.isArray(rows) || rows.length !== 1) {
                     throw new Error('admin');
