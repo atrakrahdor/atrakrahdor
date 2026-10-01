@@ -9960,10 +9960,19 @@ function openIconPicker(e, targetSvg) {
             closeModal('iconPickerModal');
         }
 
-      function triggerImageUpload(imageId) {
+function triggerImageUpload(imageId) {
     if (!state.isAdmin) return;
 
-    const uploader = document.getElementById('globalImageUploader');
+    // اگر input در HTML نبود، خودش ساخته می‌شود
+    let uploader = document.getElementById('globalImageUploader');
+    if (!uploader) {
+        uploader = document.createElement('input');
+        uploader.type = 'file';
+        uploader.id = 'globalImageUploader';
+        uploader.accept = 'image/*,video/*';
+        uploader.style.display = 'none';
+        document.body.appendChild(uploader);
+    }
 
     uploader.onchange = (evt) => {
         const file = evt.target.files[0];
@@ -9973,40 +9982,55 @@ function openIconPicker(e, targetSvg) {
 
         reader.onload = (e) => {
             const img = document.getElementById(imageId);
+            if (!img) return;
 
-            if (img) {
-                const imageData = e.target.result;
-
-                // نمایش عکس جدید
+            const saveImage = (imageData) => {
                 img.src = imageData;
 
-                // ذخیره دائمی عکس
                 let savedImages = {};
-
                 try {
                     savedImages = JSON.parse(
                         localStorage.getItem('atrak_saved_images') || '{}'
                     );
-                } catch (e) {
+                } catch (err) {
                     savedImages = {};
                 }
 
                 savedImages[imageId] = imageData;
 
-                localStorage.setItem(
-                    'atrak_saved_images',
-                    JSON.stringify(savedImages)
-                );
-                syncStateToCloud();
+                try {
+                    localStorage.setItem(
+                        'atrak_saved_images',
+                        JSON.stringify(savedImages)
+                    );
+                } catch (err) {
+                    alert('حجم عکس‌ها زیاد است و ذخیره نشد. یک عکس کم‌حجم‌تر انتخاب کنید.');
+                    return;
+                }
 
-                // ذخیره فوری
-                console.log('عکس ذخیره شد:', imageId);
+                syncStateToCloud();
+            };
+
+            // فشرده‌سازی عکس تا حافظه مرورگر پر نشود
+            if (file.type.startsWith('image/') && file.type !== 'image/gif') {
+                const tmp = new Image();
+                tmp.onload = () => {
+                    const maxW = 1400;
+                    const scale = Math.min(1, maxW / tmp.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(tmp.width * scale);
+                    canvas.height = Math.round(tmp.height * scale);
+                    canvas.getContext('2d').drawImage(tmp, 0, 0, canvas.width, canvas.height);
+                    saveImage(canvas.toDataURL('image/jpeg', 0.82));
+                };
+                tmp.onerror = () => saveImage(e.target.result);
+                tmp.src = e.target.result;
+            } else {
+                saveImage(e.target.result);
             }
         };
 
         reader.readAsDataURL(file);
-
-        // برای اینکه بتوان همان فایل را دوباره انتخاب کرد
         uploader.value = '';
     };
 
@@ -10512,9 +10536,9 @@ function logoutStudent() {
             if (chat) chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
         }
 
-     
+      
 
-     // تنظیمات بازوی بله مدرسه اترک
+    // تنظیمات بازوی بله مدرسه اترک
    // توجه: توکن ربات دیگر اینجا (سمت کاربر) قرار داده نمی‌شود.
    // ارسال پیام به بله از طریق Supabase Edge Function انجام می‌شود تا توکن لو نرود.
 const BALE_EDGE_FUNCTION_URL = "https://ynbtegberxjesxvjevoi.supabase.co/functions/v1/super-handler";
@@ -10646,6 +10670,7 @@ async function pollForBaleReplies() {
 }
 
 setInterval(pollForBaleReplies, 4000);
+
         function toggleFaq(faqItem) {
             faqItem.classList.toggle('open');
         }
@@ -10731,4 +10756,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
-
