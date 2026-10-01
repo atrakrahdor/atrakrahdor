@@ -8331,7 +8331,7 @@ async function openQuestionChapter(
 
     try {
         if (typeof loadQuestionsLessonFromCloud === 'function') {
-            const cloudQuestions = await loadQuestionsLessonFromCloud(chapterId);
+            const cloudQuestions = await loadQuestionsLessonFromCloud(parentLessonId);
             if (cloudQuestions && typeof cloudQuestions === 'object') {
                 data = cloudQuestions;
             } else {
@@ -8365,10 +8365,10 @@ async function openQuestionChapter(
             }
         ];
 
-        await saveLessonQuestions(
-            chapterId,
-            data
-        );
+saveLessonQuestions(
+    parentLessonId,
+    data
+);
     }
 
 
@@ -8386,10 +8386,10 @@ async function openQuestionChapter(
             }
         ];
 
-        await saveLessonQuestions(
-            chapterId,
-            data
-        );
+saveLessonQuestions(
+    parentLessonId,
+    data
+);
     }
 
 
