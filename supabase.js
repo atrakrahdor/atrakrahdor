@@ -167,7 +167,7 @@ async function startAtrakRealtime() {
                     scheduleRealtimeSiteRefresh();
                 }
             )
-.on(
+            .on(
     'postgres_changes',
     {
         event: '*',
@@ -187,12 +187,18 @@ async function startAtrakRealtime() {
             return;
         }
 
+        // تغییرات عنوان کارت‌های سوالات
+        if (changedId === ATRAK_QCHAPTER_ROW_ID) {
+            if (typeof state !== 'undefined' && state && state.isAdmin === true) {
+                return;
+            }
+            // فقط ذخیره می‌شود؛ دفعه بعد که کاربر کارت‌ها را باز کند، متن جدید را می‌بیند
+            loadQuestionChapterSettingsFromCloud();
+            return;
+        }
+
         // فقط تغییرات مربوط به بانک سوالات
-        if (
-            !changedId.startsWith(
-                'questions_lesson_'
-            )
-        ) {
+        if (!changedId.startsWith('questions_lesson_')) {
             return;
         }
 
@@ -276,7 +282,7 @@ async function loadMainStateFromCloud() {
         if (typeof data.honors === 'string') {
             localStorage.setItem('atrak_honors_v1', data.honors);
         }
-
+       
         if (typeof data.iconColor === 'string') {
             localStorage.setItem('atrak_icon_color', data.iconColor);
         }
@@ -586,6 +592,8 @@ async function loadStateFromCloud() {
 
     await loadQuestionsBankFromCloud();
 
+    await loadQuestionChapterSettingsFromCloud();
+
 }
 // =========================================================
 // LMS QUESTIONS CLOUD STORAGE
@@ -797,5 +805,66 @@ async function loadLmsLessonFromCloud(
         );
 
         return null;
+    }
+}
+
+// =========================================================
+// عنوان و توضیح کارت‌های سوالات هر درس (برای همه کاربران)
+// =========================================================
+const ATRAK_QCHAPTER_ROW_ID = 'question_chapter_settings';
+
+async function saveQuestionChapterSettingsToCloud(settings) {
+    if (!isCloudStorageConfigured()) return false;
+    if (typeof state === 'undefined' || !state || state.isAdmin !== true) return false;
+
+    try {
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/site_state?on_conflict=id`,
+            {
+                method: 'POST',
+                headers: getSupabaseWriteHeaders(),
+                body: JSON.stringify({
+                    id: ATRAK_QCHAPTER_ROW_ID,
+                    data: {
+                        schemaVersion: 1,
+                        updatedAt: String(Date.now()),
+                        settings: settings || {}
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const details = await response.text().catch(() => '');
+            throw new Error(response.status + ' ' + details);
+        }
+        return true;
+    } catch (error) {
+        console.error('❌ ذخیره عنوان کارت‌های سوالات ناموفق بود:', error);
+        alert('تغییر روی این دستگاه ذخیره شد اما در سرور ذخیره نشد.\n' + error.message);
+        return false;
+    }
+}
+
+async function loadQuestionChapterSettingsFromCloud() {
+    if (!isCloudStorageConfigured()) return;
+
+    try {
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/site_state?id=eq.${ATRAK_QCHAPTER_ROW_ID}&select=data`,
+            { headers: { apikey: SUPABASE_ANON_KEY } }
+        );
+        if (!response.ok) return;
+
+        const rows = await response.json();
+        const data = rows[0] && rows[0].data;
+        if (data && data.settings && typeof data.settings === 'object') {
+            localStorage.setItem(
+                'atrak_question_chapter_settings',
+                JSON.stringify(data.settings)
+            );
+        }
+    } catch (error) {
+        console.error('خطا در دریافت عنوان کارت‌های سوالات:', error);
     }
 }
