@@ -9283,9 +9283,11 @@ function enableAdminEditableFields() {
                     ? state.currentView
                     : 'default';
 
-            const currentLesson =
-                window.currentLessonId || '';
-
+           const currentLesson =
+    (window.currentLessonId || '') +
+    (state.currentView === 'question-chapter' && window.currentQuestionChapterId
+        ? '-' + window.currentQuestionChapterId
+        : '');
             /*
              * مسیر عنصر در DOM
              */
