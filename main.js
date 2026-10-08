@@ -9265,7 +9265,10 @@ function enableAdminEditableFields() {
             el.closest('#adminLoginModal') ||
             el.closest('#questionAdminModal') ||
             el.closest('#questionEditorModal') ||
-            el.closest('#iconPickerModal')
+                       el.closest('#iconPickerModal') ||
+            el.closest('#atrakHonorModal') ||
+            el.closest('.atrak-honors-grid') ||
+            el.closest('.atrak-honors-admin-box')
         ) {
             return;
         }
