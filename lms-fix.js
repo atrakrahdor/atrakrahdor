@@ -18,6 +18,7 @@
    ========================================================= */
 (function () {
     'use strict';
+    console.log('[lms-fix] v3 بارگذاری شد');
 
     var LOCATION_KEY = 'atrak_last_lms_location_v1';
 
@@ -76,7 +77,6 @@
         var originalNavigate = window.navigateTo;
         if (typeof originalNavigate === 'function') {
             window.navigateTo = function () {
-                clearLocation();
                 return originalNavigate.apply(this, arguments);
             };
         }
@@ -84,8 +84,15 @@
         var originalRender = window.renderCurrentView;
         if (typeof originalRender === 'function') {
             window.renderCurrentView = function () {
-                if (!isDynamicView()) clearLocation();
-                return originalRender.apply(this, arguments);
+                var result = originalRender.apply(this, arguments);
+                if (!isDynamicView()) {
+                    if (state.currentView && state.currentView !== 'home') {
+                        saveLocation({ t: 'view', view: state.currentView });
+                    } else {
+                        clearLocation();
+                    }
+                }
+                return result;
             };
         }
     })();
@@ -110,10 +117,18 @@
 
         var allowed = (state && state.isAdmin) ||
             (typeof isStudentLoggedIn === 'function' && isStudentLoggedIn());
-        if (!allowed) return;
+        var needsLogin = loc.t !== 'view' ||
+            (typeof isStudentProtectedView === 'function' && isStudentProtectedView(loc.view));
+        console.log('[lms-fix] بازگشت به صفحه‌ی قبلی:', loc, 'allowed=', allowed);
+        if (needsLogin && !allowed) return;
 
         try {
-            if (loc.t === 'chapter') {
+            if (loc.t === 'view') {
+                if (views[loc.view]) {
+                    state.currentView = loc.view;
+                    renderCurrentView();
+                }
+            } else if (loc.t === 'chapter') {
                 await window.openQuestionChapter(
                     loc.chapterId, loc.chapterTitle, loc.category,
                     loc.lessonId, loc.lessonName,
@@ -169,13 +184,20 @@
         return 'سوالات متن کتاب';
     }
 
-    async function loadChapterData(chapterId, parentLessonId) {
+    async function loadChapterData(chapterId, parentLessonId, category) {
+        function hasItems(d) {
+            return d && typeof d === 'object' &&
+                Array.isArray(d[category]) && d[category].length > 0;
+        }
+
         // اول: سوالاتی که برای همین درس ذخیره شده‌اند
         var data = await loadQuestionsLessonFromCloud(chapterId);
+        if (hasItems(data)) return data;
 
-        // اگر هنوز برای این درس چیزی ثبت نشده، سوالات قدیمیِ کل کتاب نشان داده شود
-        if (!data && parentLessonId && parentLessonId !== chapterId) {
-            data = await loadQuestionsLessonFromCloud(parentLessonId);
+        // اگر برای این بخش چیزی نبود، سوالات ذخیره‌شده‌ی کل کتاب را نشان بده
+        if (parentLessonId && parentLessonId !== chapterId) {
+            var lessonData = await loadQuestionsLessonFromCloud(parentLessonId);
+            if (hasItems(lessonData)) return lessonData;
         }
         return (data && typeof data === 'object') ? data : {};
     }
@@ -234,7 +256,7 @@
         var data;
         var loadError = null;
         try {
-            data = await loadChapterData(chapterId, parentLessonId);
+            data = await loadChapterData(chapterId, parentLessonId, category);
         } catch (error) {
             console.error('دریافت سوالات این درس ناموفق بود:', error);
             loadError = error;
