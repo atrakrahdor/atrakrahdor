@@ -18,7 +18,7 @@
    ========================================================= */
 (function () {
     'use strict';
-    console.log('[lms-fix] v5 بارگذاری شد');
+    console.log('[lms-fix] v6 بارگذاری شد');
  
     var LOCATION_KEY = 'atrak_last_lms_location_v1';
  
@@ -145,81 +145,95 @@
     }
  
     /* ---------------------------------------------------------
-       رنگ مشکی چسبیده به متن (مثلاً از کپی/پیست) در حالت شب نامرئی است.
-       رنگ‌های «تیره و خاکستری» از روی متن برداشته می‌شوند تا از تم پیروی کنند؛
-       رنگ‌های واقعی (آبی، قرمز و ...) دست‌نخورده می‌مانند.
+       متن تیره روی زمینه‌ی تیره (حالت شب)
+       منبع رنگ هرچه باشد (inline، کلاس، پیست از Word و ...) بر اساس
+       «رنگ نهایی» بررسی می‌شود و فقط در حالت شب روشن‌تر نمایش داده می‌شود.
+       چیزی در متن ذخیره‌شده تغییر نمی‌کند.
        --------------------------------------------------------- */
  
-    function isDarkGrayInk(colorText) {
-        var m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(String(colorText || ''));
-        if (!m) return false;
-        var r = +m[1], g = +m[2], b = +m[3];
-        var spread = Math.max(r, g, b) - Math.min(r, g, b);
-        var lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        return spread <= 48 && lum < 0.38;
+    (function injectInkStyle() {
+        var st = document.createElement('style');
+        st.textContent = '[data-theme="dark"] .atrak-ink-fix{color:var(--text-color,#f5f0ff)!important;}';
+        document.head.appendChild(st);
+    })();
+ 
+    function parseRgba(text) {
+        var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s\/]+([\d.]+))?/.exec(String(text || ''));
+        return m ? { r: +m[1], g: +m[2], b: +m[3], a: m[4] === undefined ? 1 : +m[4] } : null;
     }
  
-    var inkNormalizing = false;
+    function lumOf(c) {
+        return (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) / 255;
+    }
+ 
+    function backgroundLum(el) {
+        var node = el;
+        while (node && node.nodeType === 1) {
+            var c = parseRgba(getComputedStyle(node).backgroundColor);
+            if (c && c.a >= 0.6) return lumOf(c);
+            node = node.parentElement;
+        }
+        return 0; // پس‌زمینه‌ی صفحه در حالت شب تیره است
+    }
  
     function normalizeInk() {
-        if (inkNormalizing || !isDynamicView()) return false;
+        if (!isDynamicView()) return 0;
         var root = document.getElementById('mainAppContent');
-        if (!root) return false;
+        if (!root) return 0;
  
-        inkNormalizing = true;
-        var changed = false;
-        try {
-            root.querySelectorAll('[style*="color"], font[color]').forEach(function (el) {
-                if (el.closest('[data-lms-control]') || el.closest('.atrak-dynamic-item') ||
-                    el.closest('button') || el.closest('.admin-banner')) return;
+        var dark = document.body.getAttribute('data-theme') === 'dark';
+        var count = 0;
  
-                if (el.style && el.style.color && isDarkGrayInk(el.style.color)) {
-                    el.style.removeProperty('color');
-                    if (!el.getAttribute('style')) el.removeAttribute('style');
-                    changed = true;
-                }
+        root.querySelectorAll('*').forEach(function (el) {
+            el.classList.remove('atrak-ink-fix');
+            if (!dark) return;
  
-                if (el.tagName === 'FONT' && el.hasAttribute('color')) {
-                    var probe = document.createElement('span');
-                    probe.style.color = el.getAttribute('color');
-                    if (probe.style.color && isDarkGrayInk(probe.style.color)) {
-                        el.removeAttribute('color');
-                        changed = true;
-                    }
-                }
+            if (el.closest('[data-lms-control], button, input, textarea, select, .atrak-dynamic-item')) return;
+ 
+            var hasText = Array.prototype.some.call(el.childNodes, function (n) {
+                return n.nodeType === 3 && n.nodeValue.trim();
             });
-        } finally {
-            inkNormalizing = false;
-        }
-        return changed;
+            if (!hasText) return;
+ 
+            var c = parseRgba(getComputedStyle(el).color);
+            if (!c) return;
+ 
+            var spread = Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b);
+            if (spread <= 60 && lumOf(c) < 0.42 && backgroundLum(el) < 0.5) {
+                el.classList.add('atrak-ink-fix');
+                count++;
+            }
+        });
+ 
+        if (count) console.log('[lms-fix] متن‌های تیره‌ی اصلاح‌شده در حالت شب:', count);
+        return count;
     }
  
     var inkTimer = null;
     function scheduleInkNormalize() {
         clearTimeout(inkTimer);
-        inkTimer = setTimeout(function () {
-            var changed = normalizeInk();
-            // اگر مدیر است، متن اصلاح‌شده هم ذخیره شود
-            if (changed && state.isAdmin === true && typeof window.saveAllEdits === 'function') {
-                window.saveAllEdits(false);
-            }
-        }, 250);
+        inkTimer = setTimeout(normalizeInk, 250);
     }
  
     (function watchContent() {
         function start() {
             var root = document.getElementById('mainAppContent');
-            if (!root || typeof MutationObserver === 'undefined') return;
-            new MutationObserver(scheduleInkNormalize).observe(root, {
-                subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'color']
-            });
+            if (root && typeof MutationObserver !== 'undefined') {
+                new MutationObserver(scheduleInkNormalize).observe(root, {
+                    subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'color']
+                });
+            }
+            if (typeof MutationObserver !== 'undefined') {
+                new MutationObserver(scheduleInkNormalize).observe(document.body, {
+                    attributes: true, attributeFilter: ['data-theme']
+                });
+            }
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', start);
         } else {
             start();
         }
-        document.addEventListener('paste', function () { scheduleInkNormalize(); }, true);
     })();
  
     /* ---------------------------------------------------------
