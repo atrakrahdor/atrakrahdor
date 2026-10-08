@@ -18,7 +18,7 @@
    ========================================================= */
 (function () {
     'use strict';
-    console.log('[lms-fix] v3 بارگذاری شد');
+    console.log('[lms-fix] v4 بارگذاری شد');
 
     var LOCATION_KEY = 'atrak_last_lms_location_v1';
 
@@ -153,10 +153,10 @@
         try {
             var root = document.getElementById('mainAppContent');
 
-            if (state.isAdmin && typeof enableAdminEditableFields === 'function') {
-                enableAdminEditableFields(); // در پایان خودش loadSavedEdits را هم صدا می‌زند
-            } else if (typeof loadSavedEdits === 'function') {
-                loadSavedEdits();
+            // شناسه‌ی متن‌ها برای همه ساخته می‌شود؛ فقط مدیر می‌تواند ویرایش کند
+            if (typeof enableAdminEditableFields === 'function') enableAdminEditableFields();
+            if (!state.isAdmin && typeof disableAdminEditableFields === 'function') {
+                disableAdminEditableFields();
             }
 
             if (typeof loadSavedImages === 'function') loadSavedImages();
@@ -168,10 +168,246 @@
                     el.removeAttribute('data-editable');
                 });
             }
+
+            snapshotBaseline();
+            applyPageEdits(false);
         } catch (e) {
             console.warn('اعمال متن‌های ذخیره‌شده روی صفحه انجام نشد:', e);
         }
     }
+
+    /* ---------------------------------------------------------
+       ذخیره‌ی متن‌های ویرایش‌شده‌ی صفحه‌های سوالات
+       در یک رکورد کوچک و جدا (به‌جای رکورد سنگین main که تایم‌اوت می‌داد)
+       --------------------------------------------------------- */
+
+    var PAGE_EDIT_PREFIX = 'lms_edits_';
+    var baseline = {};
+    var pageEditsCache = {};
+    var pageSaveTimer = null;
+    var pendingPage = null;
+
+    function pageKey() {
+        var v = state.currentView;
+        if (v === 'question-chapter' && window.currentQuestionChapterId) {
+            return 'chapter__' + window.currentQuestionChapterId;
+        }
+        if (v === 'question-chapters' && window.currentLessonId) {
+            return 'cat__' + window.currentLessonId + '__' + (window.currentQuestionCategory || '');
+        }
+        if (v === 'question-categories' && window.currentLessonId) {
+            return 'cats__' + window.currentLessonId;
+        }
+        return null;
+    }
+
+    function pageRowId(key) {
+        return PAGE_EDIT_PREFIX + encodeURIComponent(key);
+    }
+
+    function pageElements() {
+        var root = document.getElementById('mainAppContent');
+        if (!root) return [];
+        return Array.prototype.slice.call(root.querySelectorAll('[data-editable]'))
+            .filter(function (el) { return !el.hasAttribute('data-lms-control'); });
+    }
+
+    function snapshotBaseline() {
+        baseline = {};
+        pageElements().forEach(function (el) {
+            baseline[el.getAttribute('data-editable')] = el.innerHTML;
+        });
+    }
+
+    // فقط متن‌هایی که نسبت به حالت اولیه تغییر کرده‌اند
+    function collectPageEdits() {
+        var edits = {};
+        pageElements().forEach(function (el) {
+            var id = el.getAttribute('data-editable');
+            var changed = el.innerHTML !== baseline[id] || el.style.color || el.style.fontSize;
+            if (changed) {
+                edits[id] = {
+                    html: el.innerHTML,
+                    color: el.style.color || '',
+                    fontSize: el.style.fontSize || ''
+                };
+            }
+        });
+        return edits;
+    }
+
+    function stripLocalEdits() {
+        try {
+            var all = JSON.parse(localStorage.getItem('atrak_saved_edits') || '{}');
+            var changed = false;
+
+            pageElements().forEach(function (el) {
+                var id = el.getAttribute('data-editable');
+                if (id in all) { delete all[id]; changed = true; }
+            });
+
+            // متن‌های قدیمیِ صفحه‌های سوالات که در رکورد main جمع شده‌اند
+            Object.keys(all).forEach(function (id) {
+                if (/^auto-text-question-(chapter|chapters|categories)-/.test(id)) {
+                    delete all[id];
+                    changed = true;
+                }
+            });
+
+            if (changed) localStorage.setItem('atrak_saved_edits', JSON.stringify(all));
+        } catch (e) {}
+    }
+
+    async function writePageEdits(key, edits) {
+        var response = await fetch(
+            SUPABASE_URL + '/rest/v1/site_state?on_conflict=id',
+            {
+                method: 'POST',
+                headers: getSupabaseWriteHeaders(),
+                keepalive: JSON.stringify(edits).length < 50000,
+                body: JSON.stringify({
+                    id: pageRowId(key),
+                    data: { schemaVersion: 1, updatedAt: String(Date.now()), edits: edits }
+                })
+            }
+        );
+        if (!response.ok) {
+            var details = await response.text().catch(function () { return ''; });
+            throw new Error('ذخیره‌ی متن صفحه ناموفق بود: ' + response.status + ' ' + details);
+        }
+        pageEditsCache[key] = edits;
+        return true;
+    }
+
+    async function flushPageEdits() {
+        clearTimeout(pageSaveTimer);
+        var job = pendingPage;
+        pendingPage = null;
+        if (!job) return true;
+        try {
+            await writePageEdits(job.key, job.edits);
+            console.log('[lms-fix] متن صفحه ذخیره شد:', job.key);
+            return true;
+        } catch (e) {
+            console.error('[lms-fix]', e);
+            return false;
+        }
+    }
+
+    function schedulePageEdits(key, edits) {
+        pendingPage = { key: key, edits: edits };
+        clearTimeout(pageSaveTimer);
+        pageSaveTimer = setTimeout(flushPageEdits, 1200);
+    }
+
+    async function fetchPageEdits(key) {
+        var response = await fetch(
+            SUPABASE_URL + '/rest/v1/site_state?select=data&id=eq.' +
+            encodeURIComponent(pageRowId(key)),
+            { headers: { apikey: SUPABASE_ANON_KEY }, cache: 'no-store' }
+        );
+        if (!response.ok) throw new Error('status ' + response.status);
+        var rows = await response.json();
+        var data = rows[0] && rows[0].data;
+        return (data && data.edits && typeof data.edits === 'object') ? data.edits : {};
+    }
+
+    async function applyPageEdits(useCache) {
+        var key = pageKey();
+        if (!key) return;
+
+        try {
+            var edits = (useCache && pageEditsCache[key]) ? pageEditsCache[key] : await fetchPageEdits(key);
+            pageEditsCache[key] = edits;
+
+            // اگر کاربر در این فاصله صفحه را عوض کرده، چیزی اعمال نشود
+            if (pageKey() !== key) return;
+
+            var root = document.getElementById('mainAppContent');
+            if (!root) return;
+
+            Object.keys(edits).forEach(function (id) {
+                var el;
+                try { el = root.querySelector('[data-editable="' + id.replace(/"/g, '\\"') + '"]'); } catch (e) { el = null; }
+                if (!el || document.activeElement === el) return;
+                var item = edits[id] || {};
+                if (item.html !== undefined) el.innerHTML = item.html;
+                if (item.color) el.style.color = item.color;
+                if (item.fontSize) el.style.fontSize = item.fontSize;
+            });
+        } catch (e) {
+            console.warn('[lms-fix] دریافت متن‌های صفحه انجام نشد:', e);
+        }
+    }
+
+    // ذخیره‌ی متن‌ها: روی صفحه‌های سوالات به رکورد جدا می‌رود
+    (function wrapSaveAllEdits() {
+        var originalSave = window.saveAllEdits;
+        if (typeof originalSave !== 'function') return;
+
+        window.saveAllEdits = function (showMessage, syncCloud) {
+            var key = pageKey();
+            if (!key) return originalSave.apply(this, arguments);
+
+            var self = this;
+            var isAdmin = state.isAdmin === true;
+            var edits = isAdmin ? collectPageEdits() : {};
+
+            // نسخه‌ی محلی را بدون متن‌های این صفحه نگه دار و رکورد main را سنگین نکن
+            var result = originalSave.call(self, false, false);
+            if (isAdmin) stripLocalEdits();
+
+            if (!isAdmin) return result;
+
+            if (showMessage) {
+                pendingPage = { key: key, edits: edits };
+                return flushPageEdits().then(function (ok) {
+                    alert(ok ? 'تمامی تغییرات با موفقیت ذخیره شدند!'
+                             : 'ذخیره در سرور انجام نشد. Console را بررسی کنید.');
+                });
+            }
+
+            schedulePageEdits(key, edits);
+            return result;
+        };
+
+        window.addEventListener('pagehide', function () {
+            if (pendingPage) flushPageEdits();
+        });
+    })();
+
+    // رکورد main را پشت سر هم نفرست (هر حرف یک درخواست سنگین بود)
+    (function debounceMainSync() {
+        var originalSync = window.syncStateToCloud;
+        if (typeof originalSync !== 'function') return;
+
+        var timer = null;
+        var waiters = [];
+
+        window.syncStateToCloud = function () {
+            return new Promise(function (resolve) {
+                waiters.push(resolve);
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    var list = waiters;
+                    waiters = [];
+                    try {
+                        var sizes = {};
+                        ['atrak_saved_edits', 'atrak_saved_icons', 'atrak_saved_images',
+                         'atrak_dynamic_elements_v1', 'atrak_comments_v39', 'atrak_honors_v1']
+                            .forEach(function (k) {
+                                sizes[k] = Math.round((localStorage.getItem(k) || '').length / 1024) + ' KB';
+                            });
+                        console.log('[lms-fix] حجم داده‌های رکورد main:', sizes);
+                    } catch (e) {}
+                    Promise.resolve(originalSync()).then(
+                        function () { list.forEach(function (f) { f(); }); },
+                        function () { list.forEach(function (f) { f(); }); }
+                    );
+                }, 1500);
+            });
+        };
+    })();
 
     /* ---------------------------------------------------------
        ۱) صفحه‌ی سوالات یک درس (openQuestionChapter)
@@ -513,6 +749,13 @@
                     });
                 }
             });
+            return;
+        }
+
+        // ----- متن‌های ویرایش‌شده‌ی صفحه‌های سوالات -----
+        if (id.indexOf(PAGE_EDIT_PREFIX) === 0) {
+            var key = pageKey();
+            if (key && id === pageRowId(key)) applyPageEdits(false);
             return;
         }
 
