@@ -9044,21 +9044,6 @@ html:not(.dark) .edu-shape {
     margin-bottom: 25px;
 }
 
-.atrak-honors-add-btn {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: 8px;
-    padding: 9px 16px;
-    background: #111827;
-    color: white;
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: opacity .2s ease;
-}
-
 .atrak-honors-add-btn:hover {
     opacity: .85;
 }
@@ -9496,4 +9481,274 @@ body.dark-mode .atrak-honor-card {
 [data-theme="dark"] #mainAppContent .glass-card font[color="#000"],
 [data-theme="dark"] #mainAppContent .glass-card font[color="black"] {
     color: var(--text-color) !important;
+}
+/* =========================================================
+   افتخارآفرینان — طراحی نهایی (این بلاک را در انتهای style.css بچسبانید)
+   قاب دایره‌ای + حلقه لیزری چرخان + سایه نبضی + انیمیشن ورود/شناور
+   ========================================================= */
+ 
+/* ---- عنوان بخش در صفحه اصلی ---- */
+.atrak-honors-home h2 {
+    margin: 0;
+    color: var(--primary-purple);
+    font-size: 22px;
+    font-weight: 900;
+}
+ 
+/* ---- دکمه افزودن: همیشه نمایش داده شود (خود جعبه‌اش فقط برای مدیر باز می‌شود) ---- */
+.atrak-honors-add-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #ec4899 !important;
+    color: #fff !important;
+    padding: 10px 20px !important;
+    border-radius: 12px !important;
+}
+ 
+/* ---- دکمه «برای دیدن همه افتخارآفرینان...» ---- */
+.atrak-honors-more {
+    display: inline-block;
+    margin-top: 26px;
+    border: 2px solid rgba(236, 72, 153, .35);
+    background: rgba(236, 72, 153, .07);
+    color: #db2777;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
+}
+.atrak-honors-more:hover {
+    background: #ec4899;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(236, 72, 153, .35);
+}
+ 
+/* ---- شبکه ---- */
+.atrak-honors-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 34px 20px;
+    align-items: start;
+    justify-items: center;
+}
+ 
+/* ---- کارت: بدون کادر مستطیلی ---- */
+.atrak-honor-card {
+    position: relative;
+    width: 100%;
+    max-width: 230px;
+    padding: 10px 6px 14px;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-align: center;
+    opacity: 0;
+    animation:
+        atrakHonorPop .7s cubic-bezier(.2, .9, .3, 1.2) forwards,
+        atrakHonorFloat 5s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * .12s), calc(.7s + var(--i, 0) * .25s);
+    transition: transform .35s ease;
+}
+.atrak-honor-card:hover {
+    transform: translateY(-10px) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+}
+ 
+/* ---- قاب دایره‌ای عکس ---- */
+.atrak-honor-photo-wrap {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    margin: 0 auto 16px;
+    padding: 6px;
+    border-radius: 50%;
+    background: var(--card-bg, #fff);
+    z-index: 1;
+    box-shadow:
+        0 10px 28px rgba(236, 72, 153, .28),
+        0 0 0 1px rgba(236, 72, 153, .18);
+    animation: atrakHonorGlow 3s ease-in-out infinite;
+    transition: transform .35s ease;
+}
+.atrak-honor-card:hover .atrak-honor-photo-wrap {
+    transform: scale(1.06);
+}
+ 
+.atrak-honor-photo {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+}
+ 
+/* ---- حلقه لیزری چرخان (همیشه روشن، هنگام هاور تندتر و پررنگ‌تر) ---- */
+.atrak-honor-photo-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+    padding: 4px;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        #ec4899 12%,
+        #ffd1ea 20%,
+        transparent 34%,
+        transparent 62%,
+        #a855f7 76%,
+        #f9a8d4 84%,
+        transparent 100%
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: .85;
+    pointer-events: none;
+    z-index: 2;
+    animation: atrakHonorLaser 3.2s linear infinite !important;
+    animation-play-state: running !important;
+}
+.atrak-honor-card:hover .atrak-honor-photo-wrap::before {
+    opacity: 1;
+    animation-duration: 1.4s !important;
+    filter: drop-shadow(0 0 6px rgba(236, 72, 153, .9));
+}
+ 
+/* ---- هاله نرم پشت قاب ---- */
+.atrak-honor-photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -18px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236, 72, 153, .22), transparent 68%);
+    z-index: 0;
+    pointer-events: none;
+    animation: atrakHonorPulse 3s ease-in-out infinite;
+}
+ 
+/* ---- متن ---- */
+.atrak-honor-name {
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+.atrak-honor-university {
+    margin: 4px auto 0;
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 999px;
+    background: rgba(236, 72, 153, .10);
+    color: #db2777;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.8;
+}
+.atrak-honor-card:hover .atrak-honor-name {
+    color: #ec4899;
+    text-shadow: 0 0 12px rgba(236, 72, 153, .35);
+}
+.atrak-honor-card:hover .atrak-honor-university {
+    background: #ec4899;
+    color: #fff;
+    text-shadow: none;
+}
+ 
+.atrak-honor-delete {
+    display: block;
+    margin: 8px auto 0;
+    padding: 4px 14px;
+    border: 1px solid rgba(239, 68, 68, .45);
+    border-radius: 999px;
+    background: transparent;
+    color: #ef4444;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.atrak-honor-delete:hover { background: #ef4444; color: #fff; }
+ 
+/* ---- پنجره افزودن: بالاتر از نوار مدیریت (z-index آن 200000 است) ---- */
+.atrak-honor-modal-overlay { z-index: 200002 !important; }
+ 
+.atrak-honor-preview {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 4px;
+    border-radius: 50%;
+    border: 2px dashed rgba(236, 72, 153, .5);
+    background: rgba(236, 72, 153, .07);
+    color: #ec4899;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.atrak-honor-preview img { width: 100%; height: 100%; object-fit: cover; }
+ 
+.atrak-honors-save-btn {
+    border: 0;
+    border-radius: 12px;
+    background: #ec4899;
+    color: #fff;
+    font-family: inherit;
+    font-weight: 800;
+    padding: 11px 18px;
+    cursor: pointer;
+}
+.atrak-honors-save-btn:disabled { opacity: .6; cursor: wait; }
+ 
+/* ---- انیمیشن‌ها ---- */
+@keyframes atrakHonorLaser { to { transform: rotate(360deg); } }
+ 
+@keyframes atrakHonorPop {
+    0%   { opacity: 0; transform: scale(.4) translateY(30px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+ 
+@keyframes atrakHonorFloat {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -6px; }
+}
+ 
+@keyframes atrakHonorGlow {
+    0%, 100% { box-shadow: 0 10px 28px rgba(236, 72, 153, .28), 0 0 0 1px rgba(236, 72, 153, .18); }
+    50%      { box-shadow: 0 14px 40px rgba(168, 85, 247, .42), 0 0 0 1px rgba(168, 85, 247, .30); }
+}
+ 
+@keyframes atrakHonorPulse {
+    0%, 100% { transform: scale(.96); opacity: .7; }
+    50%      { transform: scale(1.06); opacity: 1; }
+}
+ 
+/* ---- ریسپانسیو ---- */
+@media (max-width: 900px) {
+    .atrak-honors-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    .atrak-honor-photo-wrap { width: 128px; height: 128px; }
+    .atrak-honor-name { font-size: 14px; }
+    .atrak-honors-grid { gap: 26px 8px; }
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+    .atrak-honor-card,
+    .atrak-honor-photo-wrap,
+    .atrak-honor-photo-wrap::before,
+    .atrak-honor-photo-wrap::after { animation: none !important; opacity: 1; }
 }
