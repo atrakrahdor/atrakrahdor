@@ -909,3 +909,68 @@
         }
     };
 })();
+ 
+/* =========================================================
+   دکمه‌ی لینک فایل (Google Drive) داخل صفحه‌ی سوالات هر درس
+ 
+   برای اضافه کردن دکمه به یک درس دیگر، فقط یک خط به
+   DRIVE_BUTTONS اضافه کنید:
+     '<شناسه‌ی درس>__questions__<دسته>__chapter_<شماره درس>': 'لینک'
+   دسته: textbook (متن کتاب) | first-term | second-term
+   ========================================================= */
+(function () {
+    'use strict';
+ 
+    var DRIVE_BUTTONS = {
+        // ریاضی هفتم - سوالات متن کتاب - درس ۱
+        'm1-p7-lesson4__questions__textbook__chapter_1':
+            'https://drive.google.com/file/d/1X_fDDsD4-Fxk2V9kFa61gqH5sbI92FkL/view?usp=sharing'
+    };
+ 
+    var BTN_ID = 'driveLinkBtnWrap';
+ 
+    function injectDriveButton() {
+        try {
+            var chapterId = window.currentQuestionChapterId;
+            var url = chapterId && DRIVE_BUTTONS[chapterId];
+            var container = document.getElementById('mainAppContent');
+            if (!url || !container || document.getElementById(BTN_ID)) return;
+            if (state.currentView !== 'question-chapter') return;
+ 
+            var body = container.querySelector('section > div[style*="min-height"]');
+            if (!body) return;
+ 
+            var wrap = document.createElement('div');
+            wrap.id = BTN_ID;
+            wrap.setAttribute('data-lms-control', '1');
+            wrap.style.cssText = 'text-align:center;margin:-8px 0 22px;';
+            wrap.innerHTML =
+                '<a href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
+                'style="display:inline-flex;align-items:center;gap:8px;padding:9px 20px;' +
+                'border-radius:999px;border:1.5px solid var(--primary);color:var(--primary);' +
+                'background:transparent;font-family:inherit;font-size:14px;font-weight:800;' +
+                'text-decoration:none;cursor:pointer;transition:background .2s,color .2s;" ' +
+                'onmouseover="this.style.background=\'var(--primary)\';this.style.color=\'#fff\'" ' +
+                'onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--primary)\'">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
+                '<polyline points="7 10 12 15 17 10"></polyline>' +
+                '<line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                '<span>مشاهده و دانلود فایل سوالات با جواب</span></a>';
+ 
+            body.parentNode.insertBefore(wrap, body);
+        } catch (e) {
+            console.warn('افزودن دکمه‌ی لینک فایل انجام نشد:', e);
+        }
+    }
+ 
+    var original = window.openQuestionChapter;
+    if (typeof original !== 'function') return;
+ 
+    window.openQuestionChapter = async function () {
+        var result = await original.apply(this, arguments);
+        injectDriveButton();
+        return result;
+    };
+})();
