@@ -946,13 +946,14 @@
             wrap.style.cssText = 'text-align:center;margin:-8px 0 22px;';
             wrap.innerHTML =
                 '<a href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
-                'style="display:inline-flex;align-items:center;gap:8px;padding:9px 20px;' +
-                'border-radius:999px;border:1.5px solid var(--primary);color:var(--primary);' +
-                'background:transparent;font-family:inherit;font-size:14px;font-weight:800;' +
+                'style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;' +
+                'border-radius:12px;border:2px solid var(--primary-purple,#4a154b);' +
+                'color:var(--primary-purple,#4a154b);background:transparent;' +
+                'font-family:inherit;font-size:15px;font-weight:800;' +
                 'text-decoration:none;cursor:pointer;transition:background .2s,color .2s;" ' +
-                'onmouseover="this.style.background=\'var(--primary)\';this.style.color=\'#fff\'" ' +
-                'onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--primary)\'">' +
-                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                'onmouseover="this.style.background=\'var(--primary-purple,#4a154b)\';this.style.color=\'#fff\'" ' +
+                'onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--primary-purple,#4a154b)\'">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
                 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
                 '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
                 '<polyline points="7 10 12 15 17 10"></polyline>' +
