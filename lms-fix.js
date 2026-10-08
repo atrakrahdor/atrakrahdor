@@ -924,7 +924,31 @@
     var DRIVE_BUTTONS = {
         // ریاضی هفتم - سوالات متن کتاب - درس ۱
         'm1-p7-lesson4__questions__textbook__chapter_1':
-            'https://drive.google.com/file/d/1X_fDDsD4-Fxk2V9kFa61gqH5sbI92FkL/view?usp=sharing'
+            'https://drive.google.com/file/d/1X_fDDsD4-Fxk2V9kFa61gqH5sbI92FkL/view?usp=sharing',
+        // درس 2
+        'm1-p7-lesson4__questions__textbook__chapter_2':
+            'https://drive.google.com/file/d/1dVyfZj91rTZkLGYz1ju9vjW9evFyKIAk/view?usp=sharing',
+        // درس 3
+        'm1-p7-lesson4__questions__textbook__chapter_3':
+            'https://drive.google.com/file/d/18Ci7Kp9lnTXC5aNVkKxZnsWIVLIsELiU/view?usp=sharing',
+        // درس 4
+        'm1-p7-lesson4__questions__textbook__chapter_4':
+            'https://drive.google.com/file/d/1IvO0iHtY3POvUdUtpMtd4lbNr8GiZMnp/view?usp=sharing',
+        // درس 5
+        'm1-p7-lesson4__questions__textbook__chapter_5':
+            'https://drive.google.com/file/d/10p_fsigU4WJ0xJ5yRXFgA02Wti_W8RY0/view?usp=sharing',
+        // درس 6
+        'm1-p7-lesson4__questions__textbook__chapter_6':
+            'https://drive.google.com/file/d/1seYzOL1wTSdK8OQryiCyuYbnTZhpI00H/view?usp=sharing',
+        // درس 7
+        'm1-p7-lesson4__questions__textbook__chapter_7':
+            'https://drive.google.com/file/d/1-eg9tEUpR3vIMsy3FfO1e79PD_PIceIf/view?usp=sharing',
+        // درس 8
+        'm1-p7-lesson4__questions__textbook__chapter_8':
+            'https://drive.google.com/file/d/14EcaBy2zOZdjU6R26KXAMhOa_RYO6YcP/view?usp=sharing',
+        // درس 9
+        'm1-p7-lesson4__questions__textbook__chapter_9':
+            'https://drive.google.com/file/d/1pTsfud1rme607KR3SUBrVI4zoXIYxP-U/view?usp=sharing'
     };
  
     var BTN_ID = 'driveLinkBtnWrap';
@@ -975,3 +999,4 @@
         return result;
     };
 })();
+ 
