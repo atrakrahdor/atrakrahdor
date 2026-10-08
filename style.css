@@ -9476,3 +9476,24 @@ body.dark-mode .atrak-honor-card {
         height: 105px;
     }
 }
+/* ===== حالت شب: متن داخل کارت‌ها همیشه روشن ===== */
+
+/* ۱) هر متنی که رنگ دستی ندارد، از رنگ تم پیروی کند */
+[data-theme="dark"] #mainAppContent .glass-card *:not(svg):not(svg *):not(button):not(input):not(textarea):not(select):not(font[color]):not([style^="color"]):not([style*=" color:"]):not([style*=";color"]) {
+    color: var(--text-color) !important;
+}
+
+/* ۲) رنگ مشکی دستی/چسبیده هم در حالت شب روشن شود (آبی، قرمز و ... دست نمی‌خورند) */
+[data-theme="dark"] #mainAppContent .glass-card [style*="color: rgb(0, 0, 0)"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color:rgb(0,0,0)"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color: #000"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color:#000"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color: black"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color:black"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color: rgb(33, 37, 41)"],
+[data-theme="dark"] #mainAppContent .glass-card [style*="color: rgb(51, 51, 51)"],
+[data-theme="dark"] #mainAppContent .glass-card font[color="#000000"],
+[data-theme="dark"] #mainAppContent .glass-card font[color="#000"],
+[data-theme="dark"] #mainAppContent .glass-card font[color="black"] {
+    color: var(--text-color) !important;
+}
