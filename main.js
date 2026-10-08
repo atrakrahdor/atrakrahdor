@@ -5925,6 +5925,11 @@ function escDyn(v){
         .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 
+function dynIsAutoColor(v, legacyDefault){
+    const x = String(v || '').trim().toLowerCase();
+    return !x || x === legacyDefault;
+}
+
 function safeDynColor(v, fallback=''){
     const x=String(v||'').trim();
     return /^#[0-9a-fA-F]{6}$/.test(x) || /^#[0-9a-fA-F]{3}$/.test(x) ? x : fallback;
@@ -6030,6 +6035,14 @@ function openDynamicForm(type,item=null){
           <label>رنگ متن<input type="color" aria-label="رنگ متن عنصر" id="dynTextColor" value="${safeDynColor(item?.color,'#4a154b')}"></label>
           ${type==='box'?`<label>رنگ پس‌زمینه<input type="color" aria-label="رنگ پس‌زمینه عنصر" id="dynBgColor" value="${safeDynColor(item?.bg,'#ffffff')}"></label>`:''}
         </div>
+                <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="dynTextColorAuto" style="width:auto;margin:0;" ${dynIsAutoColor(item?.color,'#4a154b')?'checked':''}>
+          رنگ متن خودکار (با تغییر تم، تغییر کند)
+        </label>
+        ${type==='box'?`<label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="dynBgColorAuto" style="width:auto;margin:0;" ${dynIsAutoColor(item?.bg,'#ffffff')?'checked':''}>
+          پس‌زمینه خودکار (با تغییر تم، تغییر کند)
+        </label>`:''}
         <label>شفافیت <input type="range" aria-label="شفافیت عنصر" id="dynOpacity" min="0.05" max="1" step="0.05" value="${item?.opacity??1}"></label>
         <div class="atrak-dynamic-actions">
           <button style="background:#7c3aed;color:#fff;" onclick="saveDynamicForm('${type}','${item?.id||''}')" type="button">ذخیره</button>
@@ -6042,8 +6055,13 @@ function closeDynamicFormModal(){const m=document.getElementById('atrakDynamicFo
 function saveDynamicForm(type,id){
     const text=document.getElementById('dynFormText')?.value||'';
     if(!text.trim()){alert('لطفاً متن را وارد کنید.');return;}
-    const patch={text,color:document.getElementById('dynTextColor')?.value||'#4a154b',opacity:Number(document.getElementById('dynOpacity')?.value||1)};
-    if(type==='box'){patch.href=document.getElementById('dynFormHref')?.value.trim()||'';patch.bg=document.getElementById('dynBgColor')?.value||'#ffffff';}
+       const textAuto=document.getElementById('dynTextColorAuto')?.checked;
+    const patch={text,color:textAuto?'':(document.getElementById('dynTextColor')?.value||''),opacity:Number(document.getElementById('dynOpacity')?.value||1)};
+    if(type==='box'){
+        const bgAuto=document.getElementById('dynBgColorAuto')?.checked;
+        patch.href=document.getElementById('dynFormHref')?.value.trim()||'';
+        patch.bg=bgAuto?'':(document.getElementById('dynBgColor')?.value||'');
+    }
     if(id)updateDynamicElement(id,patch); else {const p=dynamicDefaultPosition();addDynamicElement({id:createAtrakDynamicId(),view:getAtrakDynamicView(),type,...p,...patch});}
     closeDynamicFormModal();
 }
@@ -6206,8 +6224,8 @@ function renderAtrakDynamicElements(){
         el.className='atrak-dynamic-item'+(item.id===atrakDynamicSelectedId?' admin-selected':'');el.dataset.id=item.id;
         el.style.left=item.x+'px';el.style.top=item.y+'px';el.style.width=item.w+'px';el.style.height=item.h+'px';el.style.zIndex=String(item.z||40);el.style.opacity=item.opacity;
         let inner='';
-        if(item.type==='box')inner=`<div class="atrak-drag-surface atrak-dynamic-box" style="${safeDynColor(item.bg)?'background:'+safeDynColor(item.bg)+';':''}${safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
-        if(item.type==='text')inner=`<div class="atrak-drag-surface atrak-dynamic-text" style="${safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
+        if(item.type==='box')inner=`<div class="atrak-drag-surface atrak-dynamic-box" style="${!dynIsAutoColor(item.bg,'#ffffff')&&safeDynColor(item.bg)?'background:'+safeDynColor(item.bg)+';':''}${!dynIsAutoColor(item.color,'#4a154b')&&safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
+        if(item.type==='text')inner=`<div class="atrak-drag-surface atrak-dynamic-text" style="${!dynIsAutoColor(item.color,'#4a154b')&&safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
         if(item.type==='image')inner=`<div class="atrak-drag-surface atrak-dynamic-image-wrap"><img class="atrak-dynamic-image" src="${escDyn(item.image||'')}" alt="" onerror="this.style.opacity='.25'" decoding="async" loading="lazy"></div>`;
         if(item.type==='icon')inner=`<div class="atrak-drag-surface atrak-dynamic-icon" style="color:${safeDynColor(item.color,'#ec4899')};"><svg viewBox="0 0 24 24">${iconLibrary100[Number(item.iconIndex)||0]||iconLibrary100[0]}</svg></div>`;
         if(item.type==='table')inner=renderDynamicTableHTML(item);
