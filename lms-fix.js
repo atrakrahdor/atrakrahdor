@@ -1,9 +1,9 @@
 /* =========================================================
    lms-fix.js
    اصلاحیه بخش سوالات سامانه محتوا (LMS)
-
+ 
    این فایل باید در index.html «بعد از supabase.js» بارگذاری شود.
-
+ 
    مشکلاتی که حل می‌کند:
    1) سوالاتی که مدیر از داخل صفحه‌ی هر درس ذخیره می‌کرد، زیر شناسه‌ی
       «همان درس» در Supabase ذخیره می‌شد، ولی صفحه‌ی عمومی از شناسه‌ی
@@ -18,14 +18,14 @@
    ========================================================= */
 (function () {
     'use strict';
-    console.log('[lms-fix] v4 بارگذاری شد');
-
+    console.log('[lms-fix] v5 بارگذاری شد');
+ 
     var LOCATION_KEY = 'atrak_last_lms_location_v1';
-
+ 
     /* ---------------------------------------------------------
        ابزارهای کمکی
        --------------------------------------------------------- */
-
+ 
     function esc(value) {
         if (typeof escapeQuestionHTML === 'function') {
             return escapeQuestionHTML(value);
@@ -37,11 +37,11 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     }
-
+ 
     function sleep(ms) {
         return new Promise(function (resolve) { setTimeout(resolve, ms); });
     }
-
+ 
     // صفحاتی که با innerHTML ساخته می‌شوند و داخل views نیستند
     function isDynamicView() {
         try {
@@ -52,26 +52,26 @@
             return false;
         }
     }
-
+ 
     /* ---------------------------------------------------------
        ذخیره و بازیابی محل کاربر (برای F5)
        --------------------------------------------------------- */
-
+ 
     var initialLocation = null;
     try {
         initialLocation = JSON.parse(sessionStorage.getItem(LOCATION_KEY) || 'null');
     } catch (e) {
         initialLocation = null;
     }
-
+ 
     function saveLocation(loc) {
         try { sessionStorage.setItem(LOCATION_KEY, JSON.stringify(loc)); } catch (e) {}
     }
-
+ 
     function clearLocation() {
         try { sessionStorage.removeItem(LOCATION_KEY); } catch (e) {}
     }
-
+ 
     // وقتی کاربر به یک صفحه‌ی معمولی می‌رود، محل ذخیره‌شده پاک شود
     (function wrapNavigation() {
         var originalNavigate = window.navigateTo;
@@ -80,7 +80,7 @@
                 return originalNavigate.apply(this, arguments);
             };
         }
-
+ 
         var originalRender = window.renderCurrentView;
         if (typeof originalRender === 'function') {
             window.renderCurrentView = function () {
@@ -96,16 +96,16 @@
             };
         }
     })();
-
+ 
     var restored = false;
-
+ 
     async function restoreLocationOnce() {
         if (restored) return;
         restored = true;
-
+ 
         var loc = initialLocation;
         if (!loc || !loc.t) return;
-
+ 
         // اگر مدیر بوده، صبر کن نشست مدیر برگردد (حداکثر ۴ ثانیه)
         var hasToken = false;
         try { hasToken = !!sessionStorage.getItem('atrak_admin_access_token'); } catch (e) {}
@@ -114,14 +114,14 @@
                 await sleep(100);
             }
         }
-
+ 
         var allowed = (state && state.isAdmin) ||
             (typeof isStudentLoggedIn === 'function' && isStudentLoggedIn());
         var needsLogin = loc.t !== 'view' ||
             (typeof isStudentProtectedView === 'function' && isStudentProtectedView(loc.view));
         console.log('[lms-fix] بازگشت به صفحه‌ی قبلی:', loc, 'allowed=', allowed);
         if (needsLogin && !allowed) return;
-
+ 
         try {
             if (loc.t === 'view') {
                 if (views[loc.view]) {
@@ -143,24 +143,102 @@
             console.warn('بازگشت به صفحه‌ی قبلی انجام نشد:', e);
         }
     }
-
+ 
+    /* ---------------------------------------------------------
+       رنگ مشکی چسبیده به متن (مثلاً از کپی/پیست) در حالت شب نامرئی است.
+       رنگ‌های «تیره و خاکستری» از روی متن برداشته می‌شوند تا از تم پیروی کنند؛
+       رنگ‌های واقعی (آبی، قرمز و ...) دست‌نخورده می‌مانند.
+       --------------------------------------------------------- */
+ 
+    function isDarkGrayInk(colorText) {
+        var m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(String(colorText || ''));
+        if (!m) return false;
+        var r = +m[1], g = +m[2], b = +m[3];
+        var spread = Math.max(r, g, b) - Math.min(r, g, b);
+        var lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return spread <= 48 && lum < 0.38;
+    }
+ 
+    var inkNormalizing = false;
+ 
+    function normalizeInk() {
+        if (inkNormalizing || !isDynamicView()) return false;
+        var root = document.getElementById('mainAppContent');
+        if (!root) return false;
+ 
+        inkNormalizing = true;
+        var changed = false;
+        try {
+            root.querySelectorAll('[style*="color"], font[color]').forEach(function (el) {
+                if (el.closest('[data-lms-control]') || el.closest('.atrak-dynamic-item') ||
+                    el.closest('button') || el.closest('.admin-banner')) return;
+ 
+                if (el.style && el.style.color && isDarkGrayInk(el.style.color)) {
+                    el.style.removeProperty('color');
+                    if (!el.getAttribute('style')) el.removeAttribute('style');
+                    changed = true;
+                }
+ 
+                if (el.tagName === 'FONT' && el.hasAttribute('color')) {
+                    var probe = document.createElement('span');
+                    probe.style.color = el.getAttribute('color');
+                    if (probe.style.color && isDarkGrayInk(probe.style.color)) {
+                        el.removeAttribute('color');
+                        changed = true;
+                    }
+                }
+            });
+        } finally {
+            inkNormalizing = false;
+        }
+        return changed;
+    }
+ 
+    var inkTimer = null;
+    function scheduleInkNormalize() {
+        clearTimeout(inkTimer);
+        inkTimer = setTimeout(function () {
+            var changed = normalizeInk();
+            // اگر مدیر است، متن اصلاح‌شده هم ذخیره شود
+            if (changed && state.isAdmin === true && typeof window.saveAllEdits === 'function') {
+                window.saveAllEdits(false);
+            }
+        }, 250);
+    }
+ 
+    (function watchContent() {
+        function start() {
+            var root = document.getElementById('mainAppContent');
+            if (!root || typeof MutationObserver === 'undefined') return;
+            new MutationObserver(scheduleInkNormalize).observe(root, {
+                subtree: true, childList: true, attributes: true, attributeFilter: ['style', 'color']
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', start);
+        } else {
+            start();
+        }
+        document.addEventListener('paste', function () { scheduleInkNormalize(); }, true);
+    })();
+ 
     /* ---------------------------------------------------------
        بعد از ساخته شدن هر صفحه‌ی پویا:
        متن‌های ویرایش‌شده دوباره اعمال شوند
        --------------------------------------------------------- */
-
+ 
     function afterDynamicRender() {
         try {
             var root = document.getElementById('mainAppContent');
-
+ 
             // شناسه‌ی متن‌ها برای همه ساخته می‌شود؛ فقط مدیر می‌تواند ویرایش کند
             if (typeof enableAdminEditableFields === 'function') enableAdminEditableFields();
             if (!state.isAdmin && typeof disableAdminEditableFields === 'function') {
                 disableAdminEditableFields();
             }
-
+ 
             if (typeof loadSavedImages === 'function') loadSavedImages();
-
+ 
             // دکمه‌های کنترلی نباید قابل ویرایش متنی باشند
             if (root) {
                 root.querySelectorAll('[data-lms-control]').forEach(function (el) {
@@ -168,25 +246,26 @@
                     el.removeAttribute('data-editable');
                 });
             }
-
+ 
             snapshotBaseline();
             applyPageEdits(false);
+            scheduleInkNormalize();
         } catch (e) {
             console.warn('اعمال متن‌های ذخیره‌شده روی صفحه انجام نشد:', e);
         }
     }
-
+ 
     /* ---------------------------------------------------------
        ذخیره‌ی متن‌های ویرایش‌شده‌ی صفحه‌های سوالات
        در یک رکورد کوچک و جدا (به‌جای رکورد سنگین main که تایم‌اوت می‌داد)
        --------------------------------------------------------- */
-
+ 
     var PAGE_EDIT_PREFIX = 'lms_edits_';
     var baseline = {};
     var pageEditsCache = {};
     var pageSaveTimer = null;
     var pendingPage = null;
-
+ 
     function pageKey() {
         var v = state.currentView;
         if (v === 'question-chapter' && window.currentQuestionChapterId) {
@@ -200,25 +279,25 @@
         }
         return null;
     }
-
+ 
     function pageRowId(key) {
         return PAGE_EDIT_PREFIX + encodeURIComponent(key);
     }
-
+ 
     function pageElements() {
         var root = document.getElementById('mainAppContent');
         if (!root) return [];
         return Array.prototype.slice.call(root.querySelectorAll('[data-editable]'))
             .filter(function (el) { return !el.hasAttribute('data-lms-control'); });
     }
-
+ 
     function snapshotBaseline() {
         baseline = {};
         pageElements().forEach(function (el) {
             baseline[el.getAttribute('data-editable')] = el.innerHTML;
         });
     }
-
+ 
     // فقط متن‌هایی که نسبت به حالت اولیه تغییر کرده‌اند
     function collectPageEdits() {
         var edits = {};
@@ -235,17 +314,17 @@
         });
         return edits;
     }
-
+ 
     function stripLocalEdits() {
         try {
             var all = JSON.parse(localStorage.getItem('atrak_saved_edits') || '{}');
             var changed = false;
-
+ 
             pageElements().forEach(function (el) {
                 var id = el.getAttribute('data-editable');
                 if (id in all) { delete all[id]; changed = true; }
             });
-
+ 
             // متن‌های قدیمیِ صفحه‌های سوالات که در رکورد main جمع شده‌اند
             Object.keys(all).forEach(function (id) {
                 if (/^auto-text-question-(chapter|chapters|categories)-/.test(id)) {
@@ -253,11 +332,11 @@
                     changed = true;
                 }
             });
-
+ 
             if (changed) localStorage.setItem('atrak_saved_edits', JSON.stringify(all));
         } catch (e) {}
     }
-
+ 
     async function writePageEdits(key, edits) {
         var response = await fetch(
             SUPABASE_URL + '/rest/v1/site_state?on_conflict=id',
@@ -278,7 +357,7 @@
         pageEditsCache[key] = edits;
         return true;
     }
-
+ 
     async function flushPageEdits() {
         clearTimeout(pageSaveTimer);
         var job = pendingPage;
@@ -293,13 +372,13 @@
             return false;
         }
     }
-
+ 
     function schedulePageEdits(key, edits) {
         pendingPage = { key: key, edits: edits };
         clearTimeout(pageSaveTimer);
         pageSaveTimer = setTimeout(flushPageEdits, 1200);
     }
-
+ 
     async function fetchPageEdits(key) {
         var response = await fetch(
             SUPABASE_URL + '/rest/v1/site_state?select=data&id=eq.' +
@@ -311,21 +390,21 @@
         var data = rows[0] && rows[0].data;
         return (data && data.edits && typeof data.edits === 'object') ? data.edits : {};
     }
-
+ 
     async function applyPageEdits(useCache) {
         var key = pageKey();
         if (!key) return;
-
+ 
         try {
             var edits = (useCache && pageEditsCache[key]) ? pageEditsCache[key] : await fetchPageEdits(key);
             pageEditsCache[key] = edits;
-
+ 
             // اگر کاربر در این فاصله صفحه را عوض کرده، چیزی اعمال نشود
             if (pageKey() !== key) return;
-
+ 
             var root = document.getElementById('mainAppContent');
             if (!root) return;
-
+ 
             Object.keys(edits).forEach(function (id) {
                 var el;
                 try { el = root.querySelector('[data-editable="' + id.replace(/"/g, '\\"') + '"]'); } catch (e) { el = null; }
@@ -339,26 +418,26 @@
             console.warn('[lms-fix] دریافت متن‌های صفحه انجام نشد:', e);
         }
     }
-
+ 
     // ذخیره‌ی متن‌ها: روی صفحه‌های سوالات به رکورد جدا می‌رود
     (function wrapSaveAllEdits() {
         var originalSave = window.saveAllEdits;
         if (typeof originalSave !== 'function') return;
-
+ 
         window.saveAllEdits = function (showMessage, syncCloud) {
             var key = pageKey();
             if (!key) return originalSave.apply(this, arguments);
-
+ 
             var self = this;
             var isAdmin = state.isAdmin === true;
             var edits = isAdmin ? collectPageEdits() : {};
-
+ 
             // نسخه‌ی محلی را بدون متن‌های این صفحه نگه دار و رکورد main را سنگین نکن
             var result = originalSave.call(self, false, false);
             if (isAdmin) stripLocalEdits();
-
+ 
             if (!isAdmin) return result;
-
+ 
             if (showMessage) {
                 pendingPage = { key: key, edits: edits };
                 return flushPageEdits().then(function (ok) {
@@ -366,24 +445,24 @@
                              : 'ذخیره در سرور انجام نشد. Console را بررسی کنید.');
                 });
             }
-
+ 
             schedulePageEdits(key, edits);
             return result;
         };
-
+ 
         window.addEventListener('pagehide', function () {
             if (pendingPage) flushPageEdits();
         });
     })();
-
+ 
     // رکورد main را پشت سر هم نفرست (هر حرف یک درخواست سنگین بود)
     (function debounceMainSync() {
         var originalSync = window.syncStateToCloud;
         if (typeof originalSync !== 'function') return;
-
+ 
         var timer = null;
         var waiters = [];
-
+ 
         window.syncStateToCloud = function () {
             return new Promise(function (resolve) {
                 waiters.push(resolve);
@@ -408,28 +487,28 @@
             });
         };
     })();
-
+ 
     /* ---------------------------------------------------------
        ۱) صفحه‌ی سوالات یک درس (openQuestionChapter)
           خواندن از همان شناسه‌ای که پنل مدیریت در آن ذخیره می‌کند
        --------------------------------------------------------- */
-
+ 
     function categoryTitleOf(category) {
         if (category === 'first-term') return 'سوالات نوبت اول';
         if (category === 'second-term') return 'سوالات نوبت دوم';
         return 'سوالات متن کتاب';
     }
-
+ 
     async function loadChapterData(chapterId, parentLessonId, category) {
         function hasItems(d) {
             return d && typeof d === 'object' &&
                 Array.isArray(d[category]) && d[category].length > 0;
         }
-
+ 
         // اول: سوالاتی که برای همین درس ذخیره شده‌اند
         var data = await loadQuestionsLessonFromCloud(chapterId);
         if (hasItems(data)) return data;
-
+ 
         // اگر برای این بخش چیزی نبود، سوالات ذخیره‌شده‌ی کل کتاب را نشان بده
         if (parentLessonId && parentLessonId !== chapterId) {
             var lessonData = await loadQuestionsLessonFromCloud(parentLessonId);
@@ -437,7 +516,7 @@
         }
         return (data && typeof data === 'object') ? data : {};
     }
-
+ 
     function buildQuestionsHTML(list) {
         var html = '';
         list.forEach(function (item, index) {
@@ -445,7 +524,7 @@
                 ? item
                 : (item && (item.question || item.text)) || '.';
             var answer = typeof item === 'string' ? '' : ((item && item.answer) || '');
-
+ 
             html +=
                 '<div style="margin-bottom:18px;padding:18px;border:1px solid var(--card-border);' +
                 'border-radius:14px;background:rgba(255,255,255,.12);">' +
@@ -462,24 +541,24 @@
         });
         return html;
     }
-
+ 
     window.openQuestionChapter = async function (
         chapterId, chapterTitle, category, parentLessonId, parentLessonName, options
     ) {
         var container = document.getElementById('mainAppContent');
         if (!container) return;
-
+ 
         var silent = !!(options && options.silent);
-
+ 
         state.currentView = 'question-chapter';
-
+ 
         window.currentQuestionChapterId = chapterId;
         window.currentQuestionChapterTitle = chapterTitle;
         window.currentQuestionChapterCategory = category;
         window.currentLessonId = parentLessonId;
         window.currentLessonName = parentLessonName;
         window.currentQuestionCategory = category;
-
+ 
         saveLocation({
             t: 'chapter',
             chapterId: chapterId,
@@ -488,7 +567,7 @@
             lessonId: parentLessonId,
             lessonName: parentLessonName
         });
-
+ 
         var data;
         var loadError = null;
         try {
@@ -498,15 +577,15 @@
             loadError = error;
             data = {};
         }
-
+ 
         // اگر کاربر در همین فاصله صفحه را عوض کرده، چیزی نساز
         if (state.currentView !== 'question-chapter' ||
             window.currentQuestionChapterId !== chapterId) {
             return;
         }
-
+ 
         var list = Array.isArray(data[category]) ? data[category] : [];
-
+ 
         var bodyHTML = loadError
             ? '<div style="text-align:center;padding:30px;color:var(--text-muted);">' +
               'دریافت سوالات از سرور انجام نشد. اینترنت خود را بررسی کنید.<br><br>' +
@@ -517,7 +596,7 @@
                 ? buildQuestionsHTML(list)
                 : '<div style="text-align:center;padding:30px;color:var(--text-muted);">' +
                   'هنوز سوالی برای این بخش ثبت نشده است.</div>');
-
+ 
         container.innerHTML =
             '<section class="glass-card fade-in-up" style="padding:25px;">' +
             '<button type="button" id="lmsBackBtn" data-lms-control="1" ' +
@@ -538,14 +617,14 @@
                   '✏️ مدیریت سوالات این درس</button></div>'
                 : '') +
             '</section>';
-
+ 
         var back = document.getElementById('lmsBackBtn');
         if (back) {
             back.addEventListener('click', function () {
                 window.openQuestionCategory(parentLessonId, parentLessonName, category);
             });
         }
-
+ 
         var retry = document.getElementById('lmsRetryBtn');
         if (retry) {
             retry.addEventListener('click', function () {
@@ -554,7 +633,7 @@
                 );
             });
         }
-
+ 
         var adminBtn = document.getElementById('lmsAdminBtn');
         if (adminBtn) {
             adminBtn.addEventListener('click', function () {
@@ -562,22 +641,22 @@
                 window.showQuestionAdminPanel(chapterId, chapterTitle, category);
             });
         }
-
+ 
         afterDynamicRender();
-
+ 
         if (typeof updateBreadcrumbs === 'function') {
             try { updateBreadcrumbs(); } catch (e) {}
         }
-
+ 
         if (!silent) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
-
+ 
     /* ---------------------------------------------------------
        ۲) پنل مدیریت: باز شدن روی بخش درست + تازه شدن صفحه بعد از بستن
        --------------------------------------------------------- */
-
+ 
     (function wrapAdminPanel() {
         var originalShow = window.showQuestionAdminPanel;
         if (typeof originalShow === 'function') {
@@ -589,12 +668,12 @@
                 }
             };
         }
-
+ 
         var originalClose = window.closeQuestionAdminPanel;
         if (typeof originalClose === 'function') {
             window.closeQuestionAdminPanel = function () {
                 originalClose.apply(this, arguments);
-
+ 
                 // بعد از بستن پنل، صفحه‌ی پشت آن با آخرین سوالات ذخیره‌شده تازه شود
                 if (state.currentView === 'question-chapter' && window.currentQuestionChapterId) {
                     window.openQuestionChapter(
@@ -609,11 +688,11 @@
             };
         }
     })();
-
+ 
     /* ---------------------------------------------------------
        ۳) ذخیره‌ی محل در صفحه‌های فهرست سوالات
        --------------------------------------------------------- */
-
+ 
     (function wrapCategoryPages() {
         var originalCategory = window.openQuestionCategory;
         if (typeof originalCategory === 'function') {
@@ -624,7 +703,7 @@
                 return result;
             };
         }
-
+ 
         var originalCategories = window.openQuestionCategories;
         if (typeof originalCategories === 'function') {
             window.openQuestionCategories = function (lessonId, lessonName) {
@@ -634,71 +713,71 @@
             };
         }
     })();
-
+ 
     /* ---------------------------------------------------------
        ۴) عنوان و توضیح کارت‌ها: ذخیره در Supabase برای همه
        --------------------------------------------------------- */
-
+ 
     window.saveQuestionChapterSettings = function (settings) {
         localStorage.setItem('atrak_question_chapter_settings', JSON.stringify(settings));
-
+ 
         if (state.isAdmin && typeof saveQuestionChapterSettingsToCloud === 'function') {
             return saveQuestionChapterSettingsToCloud(settings);
         }
         return Promise.resolve(false);
     };
-
+ 
     window.editQuestionChapterText = async function (
         lessonId, lessonName, category, chapterId, defaultTitle
     ) {
         if (!state.isAdmin) return;
-
+ 
         // آخرین نسخه‌ی سرور را بگیر تا تنظیمات دیگران پاک نشود
         try { await loadQuestionChapterSettingsFromCloud(); } catch (e) {}
-
+ 
         var current = getQuestionChapterText(lessonId, category, chapterId, defaultTitle);
-
+ 
         var newTitle = prompt('عنوان این بخش را وارد کنید:', current.title);
         if (newTitle === null) return;
-
+ 
         var newDescription = prompt('توضیح زیر عنوان را وارد کنید:', current.description);
         if (newDescription === null) return;
-
+ 
         var settings = getQuestionChapterSettings();
         var key = lessonId + '__' + category + '__' + chapterId;
-
+ 
         settings[key] = {
             title: newTitle.trim() || defaultTitle,
             description: newDescription.trim() || 'برای مشاهده سوالات وارد شوید'
         };
-
+ 
         await window.saveQuestionChapterSettings(settings);
-
+ 
         window.openQuestionCategory(lessonId, lessonName, category);
     };
-
+ 
     /* ---------------------------------------------------------
        ۵) Realtime: تغییرات را بدون پرت کردن کاربر به صفحه‌ی اصلی اعمال کن
        --------------------------------------------------------- */
-
+ 
     window.applyCloudStateAfterRealtime = function () {
         try {
             state.theme = localStorage.getItem('atrak_theme') || state.theme;
             applyTheme(state.theme);
-
+ 
             // صفحه‌های پویا (مثل سوالات) از نو ساخته نمی‌شوند؛
             // فقط متن‌های ذخیره‌شده روی همان صفحه اعمال می‌شود.
             if (!isDynamicView()) {
                 renderCurrentView();
             }
-
+ 
             loadSavedImages();
             loadSavedEdits();
             restoreIcons();
             initCarousel();
             generate100IconsList();
             renderAtrakDynamicElements();
-
+ 
             if (typeof renderAtrakNews === 'function') {
                 try { renderAtrakNews(); } catch (e) {}
             }
@@ -706,33 +785,33 @@
             console.warn('اعمال تغییرات لحظه‌ای سایت انجام نشد:', error);
         }
     };
-
+ 
     var rtStarted = false;
     var rtClient = null;
     var rtChannel = null;
-
+ 
     function onSiteStateChange(payload) {
         var row = payload && payload.new;
         if (!row || typeof row.id !== 'string') return;
-
+ 
         var id = row.id;
-
+ 
         // ----- تنظیمات و متن‌های کلی سایت -----
         if (id === SUPABASE_ROW_ID) {
             var incoming = row.data;
             if (!incoming || typeof incoming !== 'object') return;
-
+ 
             var incomingAt = Number(incoming.updatedAt || 0);
             var localAt = Number(localStorage.getItem('atrak_state_updated_at') || 0);
             if (incomingAt && localAt >= incomingAt) return;
-
+ 
             scheduleRealtimeSiteRefresh();
             return;
         }
-
+ 
         // مدیر تغییرِ خودش را دوباره دریافت نکند
         if (state && state.isAdmin === true) return;
-
+ 
         // ----- عنوان و توضیح کارت‌های درس‌ها -----
         if (id === ATRAK_QCHAPTER_ROW_ID) {
             loadQuestionChapterSettingsFromCloud().then(function () {
@@ -751,14 +830,14 @@
             });
             return;
         }
-
+ 
         // ----- متن‌های ویرایش‌شده‌ی صفحه‌های سوالات -----
         if (id.indexOf(PAGE_EDIT_PREFIX) === 0) {
             var key = pageKey();
             if (key && id === pageRowId(key)) applyPageEdits(false);
             return;
         }
-
+ 
         // ----- سوالات یک درس -----
         if (id.indexOf(ATRAK_QLESSON_PREFIX) === 0) {
             loadQuestionsBankFromCloud().then(function () {
@@ -778,24 +857,24 @@
             });
         }
     }
-
+ 
     // main.js این تابع را در آخرین مرحله‌ی بارگذاری سایت صدا می‌زند؛
     // بنابراین همین‌جا بهترین زمان بازگرداندن کاربر به صفحه‌ی قبلی است.
     window.startAtrakRealtime = async function () {
         restoreLocationOnce();
-
+ 
         if (rtStarted || !isCloudStorageConfigured()) return;
-
+ 
         if (!window.supabase || typeof window.supabase.createClient !== 'function') {
             console.warn('کتابخانه Supabase برای Realtime بارگذاری نشده است.');
             return;
         }
-
+ 
         rtStarted = true;
-
+ 
         try {
             rtClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+ 
             rtChannel = rtClient
                 .channel('atrak-site-state-realtime')
                 .on(
