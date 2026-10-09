@@ -1030,6 +1030,21 @@ window.GRADE7.questions = {
  
     var COLOR = 'var(--primary-purple,#4a154b)';
  
+    /* استایل ردیف جزوه‌ها: با رفتن ماوس روی هر ردیف، کادرش کمی پررنگ و برجسته می‌شود */
+    var NOTES_CSS =
+        '.g7-note-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;' +
+        'gap:12px;padding:14px 18px;margin-bottom:12px;border-radius:14px;' +
+        'border:1px solid var(--card-border);background:rgba(255,255,255,.12);' +
+        'transition:background .25s ease,border-color .25s ease,box-shadow .25s ease,transform .25s ease;}' +
+        '.g7-note-title{font-weight:900;font-size:16px;color:var(--text-color);transition:color .25s ease;}' +
+        '.g7-note-row:hover{border-color:rgba(74,21,75,.45);background:rgba(74,21,75,.07);' +
+        'box-shadow:0 10px 24px -14px rgba(74,21,75,.55);transform:translateY(-2px);}' +
+        '.g7-note-row:hover{border-color:color-mix(in srgb,var(--primary-purple,#4a154b) 45%,transparent);' +
+        'background:color-mix(in srgb,var(--primary-purple,#4a154b) 8%,transparent);' +
+        'box-shadow:0 10px 24px -14px color-mix(in srgb,var(--primary-purple,#4a154b) 60%,transparent);}' +
+        '.g7-note-row:hover .g7-note-title{color:var(--primary-purple,#4a154b);}' +
+        '@media (prefers-reduced-motion:reduce){.g7-note-row{transition:none;}.g7-note-row:hover{transform:none;}}';
+ 
     function getNotes() {
         return (window.GRADE7 && window.GRADE7.notes) || {};
     }
@@ -1085,15 +1100,14 @@ window.GRADE7.questions = {
                 if (url) buttons += noteButton(url, 'جزوه ' + toFa(j + 1));
             });
             rows +=
-                '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;' +
-                'gap:12px;padding:14px 18px;border:1px solid var(--card-border);border-radius:14px;' +
-                'background:rgba(255,255,255,.12);margin-bottom:12px;">' +
-                '<div style="font-weight:900;font-size:16px;color:var(--text-color);">' +
+                '<div class="g7-note-row">' +
+                '<div class="g7-note-title">' +
                 'جزوه درس ' + toFa(i + 1) + ' ' + cfg.title + '</div>' +
                 '<div style="display:flex;gap:10px;flex-wrap:wrap;">' + buttons + '</div></div>';
         });
  
         container.innerHTML =
+            '<style>' + NOTES_CSS + '</style>' +
             '<section class="glass-card fade-in-up" style="padding:25px;">' +
             '<button type="button" id="notesBackBtn" data-lms-control="1" ' +
             'style="border:none;padding:10px 18px;border-radius:10px;cursor:pointer;' +
@@ -1220,4 +1234,3 @@ window.GRADE7.questions = {
         return result;
     };
 })();
- 
