@@ -910,130 +910,129 @@
     };
 })();
  
+ 
 /* =========================================================
-   دکمه‌ی لینک فایل (Google Drive) داخل صفحه‌ی سوالات هر درس
+   grade7/data.js
+   همه‌ی لینک‌های جزوه‌ها و سوالات پایه‌ی هفتم اینجاست.
  
-   برای اضافه کردن دکمه به یک درس دیگر، فقط یک خط به
-   DRIVE_BUTTONS اضافه کنید:
-     '<شناسه‌ی درس>__questions__<دسته>__chapter_<شماره درس>': 'لینک'
-   دسته: textbook (متن کتاب) | first-term | second-term
+   برای اضافه کردن لینک جدید فقط همین فایل را ویرایش کنید
+   (راهنمای کامل در README.md).
+ 
+   شناسه‌ی درس‌ها:
+     m1-p7-lesson1 = قرآن           m1-p7-lesson5 = علوم
+     m1-p7-lesson2 = پیام‌های آسمانی  m1-p7-lesson6 = مطالعات اجتماعی
+     m1-p7-lesson3 = فارسی           m1-p7-lesson7 = عربی
+     m1-p7-lesson4 = ریاضی           m1-p7-lesson8 = انگلیسی
    ========================================================= */
-(function () {
-    'use strict';
+window.GRADE7 = window.GRADE7 || {};
  
-    var DRIVE_BUTTONS = {
-        // ریاضی هفتم - سوالات متن کتاب - درس ۱
-        'm1-p7-lesson4__questions__textbook__chapter_1':
-            'https://drive.google.com/file/d/1X_fDDsD4-Fxk2V9kFa61gqH5sbI92FkL/view?usp=sharing',
-        // درس 2
-        'm1-p7-lesson4__questions__textbook__chapter_2':
-            'https://drive.google.com/file/d/1dVyfZj91rTZkLGYz1ju9vjW9evFyKIAk/view?usp=sharing',
-        // درس 3
-        'm1-p7-lesson4__questions__textbook__chapter_3':
-            'https://drive.google.com/file/d/18Ci7Kp9lnTXC5aNVkKxZnsWIVLIsELiU/view?usp=sharing',
-        // درس 4
-        'm1-p7-lesson4__questions__textbook__chapter_4':
-            'https://drive.google.com/file/d/1IvO0iHtY3POvUdUtpMtd4lbNr8GiZMnp/view?usp=sharing',
-        // درس 5
-        'm1-p7-lesson4__questions__textbook__chapter_5':
-            'https://drive.google.com/file/d/10p_fsigU4WJ0xJ5yRXFgA02Wti_W8RY0/view?usp=sharing',
-        // درس 6
-        'm1-p7-lesson4__questions__textbook__chapter_6':
-            'https://drive.google.com/file/d/1seYzOL1wTSdK8OQryiCyuYbnTZhpI00H/view?usp=sharing',
-        // درس 7
-        'm1-p7-lesson4__questions__textbook__chapter_7':
-            'https://drive.google.com/file/d/1-eg9tEUpR3vIMsy3FfO1e79PD_PIceIf/view?usp=sharing',
-        // درس 8
-        'm1-p7-lesson4__questions__textbook__chapter_8':
-            'https://drive.google.com/file/d/14EcaBy2zOZdjU6R26KXAMhOa_RYO6YcP/view?usp=sharing',
-        // درس 9
-        'm1-p7-lesson4__questions__textbook__chapter_9':
-            'https://drive.google.com/file/d/1pTsfud1rme607KR3SUBrVI4zoXIYxP-U/view?usp=sharing'
-    };
  
-    var BTN_ID = 'driveLinkBtnWrap';
+/* ---------------------------------------------------------
+   جزوه‌ها
+   هر درس یک آرایه‌ی دو‌تایی است: [ جزوه ۱ ، جزوه ۲ ]
+   ترتیب آرایه‌ها = ترتیب درس‌ها (اولی درس ۱، دومی درس ۲ ...)
+   --------------------------------------------------------- */
+window.GRADE7.notes = {
  
-    function injectDriveButton() {
-        try {
-            var chapterId = window.currentQuestionChapterId;
-            var url = chapterId && DRIVE_BUTTONS[chapterId];
-            var container = document.getElementById('mainAppContent');
-            if (!url || !container || document.getElementById(BTN_ID)) return;
-            if (state.currentView !== 'question-chapter') return;
- 
-            var body = container.querySelector('section > div[style*="min-height"]');
-            if (!body) return;
- 
-            var wrap = document.createElement('div');
-            wrap.id = BTN_ID;
-            wrap.setAttribute('data-lms-control', '1');
-            wrap.style.cssText = 'text-align:center;margin:-8px 0 22px;';
-            wrap.innerHTML =
-                '<a href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
-                'style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;' +
-                'border-radius:12px;border:2px solid var(--primary-purple,#4a154b);' +
-                'color:var(--primary-purple,#4a154b);background:transparent;' +
-                'font-family:inherit;font-size:15px;font-weight:800;' +
-                'text-decoration:none;cursor:pointer;transition:background .2s,color .2s;" ' +
-                'onmouseover="this.style.background=\'var(--primary-purple,#4a154b)\';this.style.color=\'#fff\'" ' +
-                'onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--primary-purple,#4a154b)\'">' +
-                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-                'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-                '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
-                '<polyline points="7 10 12 15 17 10"></polyline>' +
-                '<line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
-                '<span>مشاهده و دانلود فایل سوالات با جواب</span></a>';
- 
-            body.parentNode.insertBefore(wrap, body);
-        } catch (e) {
-            console.warn('افزودن دکمه‌ی لینک فایل انجام نشد:', e);
-        }
+    // ---------------- قرآن هفتم ----------------
+    'm1-p7-lesson1': {
+        title: 'قرآن هفتم',
+        lessons: [
+            [   // درس 1
+                'https://drive.google.com/file/d/1mm5sp5BKFwE-JZKmAQ6G7JYPk4AyOqdw/view?usp=sharing',
+                'https://drive.google.com/file/d/1jWibRtJtYr-ExGM_oeAGxRFdV1r7VYAc/view?usp=sharing'
+            ],
+            [   // درس 2
+                'https://drive.google.com/file/d/1czcGJIDx5rYFuVyzYJK3NDE774IIcn_k/view?usp=sharing',
+                'https://drive.google.com/file/d/18SzgM6by1tEpsB37D9xyXvX1bYBVX3kM/view?usp=sharing'
+            ],
+            [   // درس 3
+                'https://drive.google.com/file/d/1wGBzF6cr8avYwU3cvZU6EgxUnD9fYXY0/view?usp=sharing',
+                'https://drive.google.com/file/d/1DZ4VG9P-q91z5MMdhRtWTMLGSZHKDJ8n/view?usp=sharing'
+            ],
+            [   // درس 4
+                'https://drive.google.com/file/d/1fJPKMhc5nKp3JByvxLGV5mHia33CcrkY/view?usp=sharing',
+                'https://drive.google.com/file/d/1QcFmvSh_SsrTCRkDednJS9w4_Z2WVT5F/view?usp=sharing'
+            ],
+            [   // درس 5
+                'https://drive.google.com/file/d/1kYkL8unNRui5gtFlgQyceB-ad8U3lljE/view?usp=sharing',
+                'https://drive.google.com/file/d/12U_nXue_afOCBvezTKSNbAPthZnB9wwQ/view?usp=sharing'
+            ],
+            [   // درس 6
+                'https://drive.google.com/file/d/1IewjMZoSaMhv-pVpw0fjEsI5leMbVkKO/view?usp=sharing',
+                'https://drive.google.com/file/d/1M4WhBwQB_J4oBEkxsvWbXumm4WPA97i2/view?usp=sharing'
+            ],
+            [   // درس 7
+                'https://drive.google.com/file/d/1eJHuUEbuqU6m0h7ZRtVlzgnXrfZxjA0n/view?usp=sharing',
+                'https://drive.google.com/file/d/1CC2-jO5LCt0mn2lHBoourk7So2AgxAdB/view?usp=sharing'
+            ],
+            [   // درس 8
+                'https://drive.google.com/file/d/1waGve1U86Xk5Zoj2cZD33nHq1krr6e4U/view?usp=sharing',
+                'https://drive.google.com/file/d/1kJVClW843HzAHH4f8Doup281jYTZAtyR/view?usp=sharing'
+            ],
+            [   // درس 9
+                'https://drive.google.com/file/d/1JsgXRu_keQr5ohGPdPgz7fULxy9gn1Pi/view?usp=sharing',
+                'https://drive.google.com/file/d/1jZTbbCSCkD8-whz4u42ZpZ6Nrb4uM6IL/view?usp=sharing'
+            ],
+            [   // درس 10
+                'https://drive.google.com/file/d/1AiY3aGdDzIP9ZACtKKQumA10NfwDiUEx/view?usp=sharing',
+                'https://drive.google.com/file/d/1sZHHQCtnaE_62gSSyyQLYVQ7rezKdrpK/view?usp=sharing'
+            ],
+            [   // درس 11
+                'https://drive.google.com/file/d/1HaRYfAZAcWVcjz0XJKfWFfonf1rnjsvC/view?usp=sharing',
+                'https://drive.google.com/file/d/1aStP3G4LyOMOrDM8Fi6XkPXAciBi7xWk/view?usp=sharing'
+            ],
+            [   // درس 12
+                'https://drive.google.com/file/d/16Q4eHFu5cytfXmbqs4czwfM3cyXRO23l/view?usp=sharing',
+                'https://drive.google.com/file/d/1elAb28P7ho1RQR_-kd_fit_scPe2qtSm/view?usp=sharing'
+            ]
+        ]
     }
  
-    var original = window.openQuestionChapter;
-    if (typeof original !== 'function') return;
+    // ---------------- درس بعدی را اینجا اضافه کنید ----------------
+    // ,'m1-p7-lesson2': { title: 'پیام‌های آسمانی هفتم', lessons: [ [لینک۱, لینک۲], ... ] }
+};
  
-    window.openQuestionChapter = async function () {
-        var result = await original.apply(this, arguments);
-        injectDriveButton();
-        return result;
-    };
-})();
+ 
+/* ---------------------------------------------------------
+   سوالات (دکمه‌ی لینک داخل صفحه‌ی سوالات هر درس)
+   دسته‌ها: textbook (متن کتاب) | 'first-term' (نوبت اول) | 'second-term' (نوبت دوم)
+   کلیدها شماره‌ی درس هستند.
+   --------------------------------------------------------- */
+window.GRADE7.questions = {
+ 
+    // ---------------- ریاضی هفتم ----------------
+    'm1-p7-lesson4': {
+        title: 'ریاضی هفتم',
+        textbook: {
+            1: 'https://drive.google.com/file/d/1X_fDDsD4-Fxk2V9kFa61gqH5sbI92FkL/view?usp=sharing',
+            2: 'https://drive.google.com/file/d/1dVyfZj91rTZkLGYz1ju9vjW9evFyKIAk/view?usp=sharing',
+            3: 'https://drive.google.com/file/d/18Ci7Kp9lnTXC5aNVkKxZnsWIVLIsELiU/view?usp=sharing',
+            4: 'https://drive.google.com/file/d/1IvO0iHtY3POvUdUtpMtd4lbNr8GiZMnp/view?usp=sharing',
+            5: 'https://drive.google.com/file/d/10p_fsigU4WJ0xJ5yRXFgA02Wti_W8RY0/view?usp=sharing',
+            6: 'https://drive.google.com/file/d/1seYzOL1wTSdK8OQryiCyuYbnTZhpI00H/view?usp=sharing',
+            7: 'https://drive.google.com/file/d/1-eg9tEUpR3vIMsy3FfO1e79PD_PIceIf/view?usp=sharing',
+            8: 'https://drive.google.com/file/d/14EcaBy2zOZdjU6R26KXAMhOa_RYO6YcP/view?usp=sharing',
+            9: 'https://drive.google.com/file/d/1pTsfud1rme607KR3SUBrVI4zoXIYxP-U/view?usp=sharing'
+        }
+    }
+};
  
  
 /* =========================================================
-   بخش «جزوه‌ها» — قرآن هفتم
-   هر درس دو جزوه دارد. برای افزودن درس/پایه‌ی دیگر، یک ورودی
-   به NOTES اضافه کنید:
-     'شناسه‌ی کتاب': { title: 'عنوان', lessons: [ [لینک۱, لینک۲], ... ] }
+   grade7/notes.js
+   صفحه‌ی «جزوه‌ها» برای دروس پایه‌ی هفتم.
+   داده‌ها از grade7/data.js (window.GRADE7.notes) خوانده می‌شوند.
+   این فایل باید بعد از main.js و data.js بارگذاری شود.
    ========================================================= */
 (function () {
     'use strict';
  
-    var D = 'https://drive.google.com/file/d/';
-    var S = '/view?usp=sharing';
- 
-    var NOTES = {
-        'm1-p7-lesson1': {
-            title: 'قرآن هفتم',
-            lessons: [
-                [D + '1mm5sp5BKFwE-JZKmAQ6G7JYPk4AyOqdw' + S, D + '1jWibRtJtYr-ExGM_oeAGxRFdV1r7VYAc' + S], // درس 1
-                [D + '1czcGJIDx5rYFuVyzYJK3NDE774IIcn_k' + S, D + '18SzgM6by1tEpsB37D9xyXvX1bYBVX3kM' + S], // درس 2
-                [D + '1wGBzF6cr8avYwU3cvZU6EgxUnD9fYXY0' + S, D + '1DZ4VG9P-q91z5MMdhRtWTMLGSZHKDJ8n' + S], // درس 3
-                [D + '1fJPKMhc5nKp3JByvxLGV5mHia33CcrkY' + S, D + '1QcFmvSh_SsrTCRkDednJS9w4_Z2WVT5F' + S], // درس 4
-                [D + '1kYkL8unNRui5gtFlgQyceB-ad8U3lljE' + S, D + '12U_nXue_afOCBvezTKSNbAPthZnB9wwQ' + S], // درس 5
-                [D + '1IewjMZoSaMhv-pVpw0fjEsI5leMbVkKO' + S, D + '1M4WhBwQB_J4oBEkxsvWbXumm4WPA97i2' + S], // درس 6
-                [D + '1eJHuUEbuqU6m0h7ZRtVlzgnXrfZxjA0n' + S, D + '1CC2-jO5LCt0mn2lHBoourk7So2AgxAdB' + S], // درس 7
-                [D + '1waGve1U86Xk5Zoj2cZD33nHq1krr6e4U' + S, D + '1kJVClW843HzAHH4f8Doup281jYTZAtyR' + S], // درس 8
-                [D + '1JsgXRu_keQr5ohGPdPgz7fULxy9gn1Pi' + S, D + '1jZTbbCSCkD8-whz4u42ZpZ6Nrb4uM6IL' + S], // درس 9
-                [D + '1AiY3aGdDzIP9ZACtKKQumA10NfwDiUEx' + S, D + '1sZHHQCtnaE_62gSSyyQLYVQ7rezKdrpK' + S], // درس 10
-                [D + '1HaRYfAZAcWVcjz0XJKfWFfonf1rnjsvC' + S, D + '1aStP3G4LyOMOrDM8Fi6XkPXAciBi7xWk' + S], // درس 11
-                [D + '16Q4eHFu5cytfXmbqs4czwfM3cyXRO23l' + S, D + '1elAb28P7ho1RQR_-kd_fit_scPe2qtSm' + S]  // درس 12
-            ]
-        }
-    };
- 
     var COLOR = 'var(--primary-purple,#4a154b)';
+ 
+    function getNotes() {
+        return (window.GRADE7 && window.GRADE7.notes) || {};
+    }
  
     function toFa(n) {
         return String(n).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
@@ -1058,8 +1057,11 @@
     var prevHTML = null;
     var prevView = null;
  
+    /* ---------------------------------------------------------
+       باز کردن صفحه‌ی جزوه‌ها
+       --------------------------------------------------------- */
     window.openLessonNotes = function (lessonId, lessonName) {
-        var cfg = NOTES[String(lessonId || '').trim()];
+        var cfg = getNotes()[String(lessonId || '').trim()];
         var container = document.getElementById('mainAppContent');
  
         // درس‌هایی که هنوز جزوه ندارند مثل قبل عمل می‌کنند
@@ -1077,23 +1079,25 @@
         window.currentLessonName = lessonName;
  
         var rows = '';
-        cfg.lessons.forEach(function (pair, i) {
+        cfg.lessons.forEach(function (links, i) {
+            var buttons = '';
+            links.forEach(function (url, j) {
+                if (url) buttons += noteButton(url, 'جزوه ' + toFa(j + 1));
+            });
             rows +=
                 '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;' +
                 'gap:12px;padding:14px 18px;border:1px solid var(--card-border);border-radius:14px;' +
                 'background:rgba(255,255,255,.12);margin-bottom:12px;">' +
                 '<div style="font-weight:900;font-size:16px;color:var(--text-color);">' +
                 'جزوه درس ' + toFa(i + 1) + ' ' + cfg.title + '</div>' +
-                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-                noteButton(pair[0], 'جزوه ۱') + noteButton(pair[1], 'جزوه ۲') +
-                '</div></div>';
+                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' + buttons + '</div></div>';
         });
  
         container.innerHTML =
             '<section class="glass-card fade-in-up" style="padding:25px;">' +
             '<button type="button" id="notesBackBtn" data-lms-control="1" ' +
             'style="border:none;padding:10px 18px;border-radius:10px;cursor:pointer;' +
-            'background:var(--primary-purple,#4a154b);color:white;font-weight:800;font-family:inherit;margin-bottom:25px;">' +
+            'background:' + COLOR + ';color:white;font-weight:800;font-family:inherit;margin-bottom:25px;">' +
             '← بازگشت</button>' +
             '<div style="text-align:center;margin-bottom:25px;">' +
             '<h2 style="margin:0;font-size:23px;font-weight:900;color:var(--text-color);">جزوه‌های ' + cfg.title + '</h2>' +
@@ -1119,6 +1123,101 @@
         }
  
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+ 
+    /* ---------------------------------------------------------
+       کارت «جزوه‌ها» در صفحه‌ی درس (ساخته‌شده با lessonCards در main.js)
+       مستقیم پیام «به‌زودی فعال می‌شود» را نشان می‌داد و openLessonNotes را
+       صدا نمی‌زد. اینجا کلیک روی آن را برای درس‌هایی که جزوه دارند
+       به صفحه‌ی جزوه‌ها وصل می‌کنیم.
+       --------------------------------------------------------- */
+    document.addEventListener('click', function (e) {
+        var card = e.target && e.target.closest ? e.target.closest('.drilldown-card') : null;
+        if (!card) return;
+ 
+        var handler = card.getAttribute('onclick') || '';
+        if (handler.indexOf('alert(') === -1 || handler.indexOf('جزوه') === -1) return;
+ 
+        var section = card.closest('section');
+        var titleEl = section && section.querySelector('[data-editable$="-title"]');
+        var lessonId = titleEl ? String(titleEl.getAttribute('data-editable')).replace(/-title$/, '') : '';
+        var cfg = getNotes()[lessonId];
+        if (!cfg) return; // درس بدون جزوه: همان پیام قبلی
+ 
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.openLessonNotes(lessonId, cfg.title);
+    }, true);
+})();
+ 
+ 
+/* =========================================================
+   grade7/questions.js
+   دکمه‌ی لینک فایل (Google Drive) داخل صفحه‌ی سوالات هر درس.
+   داده‌ها از grade7/data.js (window.GRADE7.questions) خوانده می‌شوند.
+   این فایل باید بعد از lms-fix.js و data.js بارگذاری شود.
+   ========================================================= */
+(function () {
+    'use strict';
+ 
+    var COLOR = 'var(--primary-purple,#4a154b)';
+    var BTN_ID = 'driveLinkBtnWrap';
+ 
+    // شناسه‌ی صفحه: <درس>__questions__<دسته>__chapter_<شماره>
+    var ID_PATTERN = /^(.+?)__questions__(.+?)__chapter_(.+)$/;
+ 
+    function findLink(chapterId) {
+        var m = ID_PATTERN.exec(String(chapterId || ''));
+        if (!m) return '';
+        var all = (window.GRADE7 && window.GRADE7.questions) || {};
+        var lesson = all[m[1]];
+        var category = lesson && lesson[m[2]];
+        return (category && category[m[3]]) || '';
+    }
+ 
+    function injectDriveButton() {
+        try {
+            var url = findLink(window.currentQuestionChapterId);
+            var container = document.getElementById('mainAppContent');
+            if (!url || !container || document.getElementById(BTN_ID)) return;
+            if (state.currentView !== 'question-chapter') return;
+ 
+            var body = container.querySelector('section > div[style*="min-height"]');
+            if (!body) return;
+ 
+            var wrap = document.createElement('div');
+            wrap.id = BTN_ID;
+            wrap.setAttribute('data-lms-control', '1');
+            wrap.style.cssText = 'text-align:center;margin:-8px 0 22px;';
+            wrap.innerHTML =
+                '<a href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
+                'style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;' +
+                'border-radius:12px;border:2px solid ' + COLOR + ';color:' + COLOR + ';' +
+                'background:transparent;font-family:inherit;font-size:15px;font-weight:800;' +
+                'text-decoration:none;cursor:pointer;transition:background .2s,color .2s;" ' +
+                'onmouseover="this.style.background=\'' + COLOR + '\';this.style.color=\'#fff\'" ' +
+                'onmouseout="this.style.background=\'transparent\';this.style.color=\'' + COLOR + '\'">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
+                '<polyline points="7 10 12 15 17 10"></polyline>' +
+                '<line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                '<span>مشاهده و دانلود فایل سوالات با جواب</span></a>';
+ 
+            body.parentNode.insertBefore(wrap, body);
+        } catch (e) {
+            console.warn('افزودن دکمه‌ی لینک فایل انجام نشد:', e);
+        }
+    }
+ 
+    var original = window.openQuestionChapter;
+    if (typeof original !== 'function') return;
+ 
+    window.openQuestionChapter = async function () {
+        var result = await original.apply(this, arguments);
+        injectDriveButton();
+        return result;
     };
 })();
  
