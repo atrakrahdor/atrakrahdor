@@ -1000,3 +1000,125 @@
     };
 })();
  
+ 
+/* =========================================================
+   بخش «جزوه‌ها» — قرآن هفتم
+   هر درس دو جزوه دارد. برای افزودن درس/پایه‌ی دیگر، یک ورودی
+   به NOTES اضافه کنید:
+     'شناسه‌ی کتاب': { title: 'عنوان', lessons: [ [لینک۱, لینک۲], ... ] }
+   ========================================================= */
+(function () {
+    'use strict';
+ 
+    var D = 'https://drive.google.com/file/d/';
+    var S = '/view?usp=sharing';
+ 
+    var NOTES = {
+        'm1-p7-lesson1': {
+            title: 'قرآن هفتم',
+            lessons: [
+                [D + '1mm5sp5BKFwE-JZKmAQ6G7JYPk4AyOqdw' + S, D + '1jWibRtJtYr-ExGM_oeAGxRFdV1r7VYAc' + S], // درس 1
+                [D + '1czcGJIDx5rYFuVyzYJK3NDE774IIcn_k' + S, D + '18SzgM6by1tEpsB37D9xyXvX1bYBVX3kM' + S], // درس 2
+                [D + '1wGBzF6cr8avYwU3cvZU6EgxUnD9fYXY0' + S, D + '1DZ4VG9P-q91z5MMdhRtWTMLGSZHKDJ8n' + S], // درس 3
+                [D + '1fJPKMhc5nKp3JByvxLGV5mHia33CcrkY' + S, D + '1QcFmvSh_SsrTCRkDednJS9w4_Z2WVT5F' + S], // درس 4
+                [D + '1kYkL8unNRui5gtFlgQyceB-ad8U3lljE' + S, D + '12U_nXue_afOCBvezTKSNbAPthZnB9wwQ' + S], // درس 5
+                [D + '1IewjMZoSaMhv-pVpw0fjEsI5leMbVkKO' + S, D + '1M4WhBwQB_J4oBEkxsvWbXumm4WPA97i2' + S], // درس 6
+                [D + '1eJHuUEbuqU6m0h7ZRtVlzgnXrfZxjA0n' + S, D + '1CC2-jO5LCt0mn2lHBoourk7So2AgxAdB' + S], // درس 7
+                [D + '1waGve1U86Xk5Zoj2cZD33nHq1krr6e4U' + S, D + '1kJVClW843HzAHH4f8Doup281jYTZAtyR' + S], // درس 8
+                [D + '1JsgXRu_keQr5ohGPdPgz7fULxy9gn1Pi' + S, D + '1jZTbbCSCkD8-whz4u42ZpZ6Nrb4uM6IL' + S], // درس 9
+                [D + '1AiY3aGdDzIP9ZACtKKQumA10NfwDiUEx' + S, D + '1sZHHQCtnaE_62gSSyyQLYVQ7rezKdrpK' + S], // درس 10
+                [D + '1HaRYfAZAcWVcjz0XJKfWFfonf1rnjsvC' + S, D + '1aStP3G4LyOMOrDM8Fi6XkPXAciBi7xWk' + S], // درس 11
+                [D + '16Q4eHFu5cytfXmbqs4czwfM3cyXRO23l' + S, D + '1elAb28P7ho1RQR_-kd_fit_scPe2qtSm' + S]  // درس 12
+            ]
+        }
+    };
+ 
+    var COLOR = 'var(--primary-purple,#4a154b)';
+ 
+    function toFa(n) {
+        return String(n).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
+    }
+ 
+    function noteButton(url, label) {
+        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
+            'style="display:inline-flex;align-items:center;gap:7px;padding:8px 18px;' +
+            'border-radius:10px;border:2px solid ' + COLOR + ';color:' + COLOR + ';' +
+            'background:transparent;font-family:inherit;font-size:14px;font-weight:800;' +
+            'text-decoration:none;cursor:pointer;transition:background .2s,color .2s;" ' +
+            'onmouseover="this.style.background=\'' + COLOR + '\';this.style.color=\'#fff\'" ' +
+            'onmouseout="this.style.background=\'transparent\';this.style.color=\'' + COLOR + '\'">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+            'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
+            '<polyline points="14 2 14 8 20 8"></polyline></svg>' +
+            '<span>' + label + '</span></a>';
+    }
+ 
+    var originalNotes = window.openLessonNotes;
+    var prevHTML = null;
+    var prevView = null;
+ 
+    window.openLessonNotes = function (lessonId, lessonName) {
+        var cfg = NOTES[String(lessonId || '').trim()];
+        var container = document.getElementById('mainAppContent');
+ 
+        // درس‌هایی که هنوز جزوه ندارند مثل قبل عمل می‌کنند
+        if (!cfg || !container) {
+            if (typeof originalNotes === 'function') return originalNotes.apply(this, arguments);
+            return;
+        }
+ 
+        if (state.currentView !== 'lesson-notes') {
+            prevHTML = container.innerHTML;
+            prevView = state.currentView;
+        }
+        state.currentView = 'lesson-notes';
+        window.currentLessonId = lessonId;
+        window.currentLessonName = lessonName;
+ 
+        var rows = '';
+        cfg.lessons.forEach(function (pair, i) {
+            rows +=
+                '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;' +
+                'gap:12px;padding:14px 18px;border:1px solid var(--card-border);border-radius:14px;' +
+                'background:rgba(255,255,255,.12);margin-bottom:12px;">' +
+                '<div style="font-weight:900;font-size:16px;color:var(--text-color);">' +
+                'جزوه درس ' + toFa(i + 1) + ' ' + cfg.title + '</div>' +
+                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+                noteButton(pair[0], 'جزوه ۱') + noteButton(pair[1], 'جزوه ۲') +
+                '</div></div>';
+        });
+ 
+        container.innerHTML =
+            '<section class="glass-card fade-in-up" style="padding:25px;">' +
+            '<button type="button" id="notesBackBtn" data-lms-control="1" ' +
+            'style="border:none;padding:10px 18px;border-radius:10px;cursor:pointer;' +
+            'background:var(--primary-purple,#4a154b);color:white;font-weight:800;font-family:inherit;margin-bottom:25px;">' +
+            '← بازگشت</button>' +
+            '<div style="text-align:center;margin-bottom:25px;">' +
+            '<h2 style="margin:0;font-size:23px;font-weight:900;color:var(--text-color);">جزوه‌های ' + cfg.title + '</h2>' +
+            '<p style="margin-top:8px;color:var(--text-muted);font-size:13px;">درس مورد نظر را پیدا کنید و جزوه را باز کنید</p></div>' +
+            rows + '</section>';
+ 
+        var back = document.getElementById('notesBackBtn');
+        if (back) {
+            back.addEventListener('click', function () {
+                if (prevHTML !== null) {
+                    container.innerHTML = prevHTML;
+                    state.currentView = prevView || 'home';
+                    prevHTML = null;
+                    prevView = null;
+                    if (state.isAdmin && typeof enableAdminEditableFields === 'function') {
+                        try { enableAdminEditableFields(); } catch (e) {}
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    location.reload();
+                }
+            });
+        }
+ 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+})();
+ 
