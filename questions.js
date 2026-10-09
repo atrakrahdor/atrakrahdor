@@ -7931,8 +7931,8 @@ function openLessonVideos(lessonId, lessonName) {
     rememberView('lesson-videos');
 
    const videoSessionCounts = {
-    'm1-p7-lesson1': 12,
-    'm1-p7-lesson2': 14,
+    'm1-p7-lesson1': 14,
+    'm1-p7-lesson2': 0,
     'm1-p7-lesson3': 17,
     'm1-p7-lesson4': 9,
     'm1-p7-lesson5': 15,
@@ -8258,21 +8258,21 @@ function openLessonVideoChapter(
         'm1-p7-lesson8__videos__chapter_9': 'https://www.aparat.com/video/video/embed/videohash/ojrc8fe/vt/frame',
         'm1-p7-lesson8__videos__chapter_10': 'https://www.aparat.com/video/video/embed/videohash/zbb316l/vt/frame',
 
-        /* پایه هفتم - پیام‌های آسمانی - جلسات ۱ تا ۱۴ */
-        'm1-p7-lesson2__videos__chapter_1': 'https://www.aparat.com/video/video/embed/videohash/oon5289/vt/frame',
-        'm1-p7-lesson2__videos__chapter_2': 'https://www.aparat.com/video/video/embed/videohash/falb891/vt/frame',
-        'm1-p7-lesson2__videos__chapter_3': 'https://www.aparat.com/video/video/embed/videohash/ygc5loa/vt/frame',
-        'm1-p7-lesson2__videos__chapter_4': 'https://www.aparat.com/video/video/embed/videohash/uwbgahh/vt/frame',
-        'm1-p7-lesson2__videos__chapter_5': 'https://www.aparat.com/video/video/embed/videohash/jpt9608/vt/frame',
-        'm1-p7-lesson2__videos__chapter_6': 'https://www.aparat.com/video/video/embed/videohash/ksbe1x8/vt/frame',
-        'm1-p7-lesson2__videos__chapter_7': 'https://www.aparat.com/video/video/embed/videohash/ieox882/vt/frame',
-        'm1-p7-lesson2__videos__chapter_8': 'https://www.aparat.com/video/video/embed/videohash/aliy844/vt/frame',
-        'm1-p7-lesson2__videos__chapter_9': 'https://www.aparat.com/video/video/embed/videohash/giw20w9/vt/frame',
-        'm1-p7-lesson2__videos__chapter_10': 'https://www.aparat.com/video/video/embed/videohash/wux0yvh/vt/frame',
-        'm1-p7-lesson2__videos__chapter_11': 'https://www.aparat.com/video/video/embed/videohash/ocn5j97/vt/frame',
-        'm1-p7-lesson2__videos__chapter_12': 'https://www.aparat.com/video/video/embed/videohash/hoj83wg/vt/frame',
-        'm1-p7-lesson2__videos__chapter_13': 'https://www.aparat.com/video/video/embed/videohash/mjr3k81/vt/frame',
-        'm1-p7-lesson2__videos__chapter_14': 'https://www.aparat.com/video/video/embed/videohash/exl0ys3/vt/frame'
+        /* پایه هفتم - قرآن - جلسات ۱ تا ۱۴ */
+        'm1-p7-lesson1__videos__chapter_1': 'https://www.aparat.com/video/video/embed/videohash/oon5289/vt/frame',
+        'm1-p7-lesson1__videos__chapter_2': 'https://www.aparat.com/video/video/embed/videohash/falb891/vt/frame',
+        'm1-p7-lesson1__videos__chapter_3': 'https://www.aparat.com/video/video/embed/videohash/ygc5loa/vt/frame',
+        'm1-p7-lesson1__videos__chapter_4': 'https://www.aparat.com/video/video/embed/videohash/uwbgahh/vt/frame',
+        'm1-p7-lesson1__videos__chapter_5': 'https://www.aparat.com/video/video/embed/videohash/jpt9608/vt/frame',
+        'm1-p7-lesson1__videos__chapter_6': 'https://www.aparat.com/video/video/embed/videohash/ksbe1x8/vt/frame',
+        'm1-p7-lesson1__videos__chapter_7': 'https://www.aparat.com/video/video/embed/videohash/ieox882/vt/frame',
+        'm1-p7-lesson1__videos__chapter_8': 'https://www.aparat.com/video/video/embed/videohash/aliy844/vt/frame',
+        'm1-p7-lesson1__videos__chapter_9': 'https://www.aparat.com/video/video/embed/videohash/giw20w9/vt/frame',
+        'm1-p7-lesson1__videos__chapter_10': 'https://www.aparat.com/video/video/embed/videohash/wux0yvh/vt/frame',
+        'm1-p7-lesson1__videos__chapter_11': 'https://www.aparat.com/video/video/embed/videohash/ocn5j97/vt/frame',
+        'm1-p7-lesson1__videos__chapter_12': 'https://www.aparat.com/video/video/embed/videohash/hoj83wg/vt/frame',
+        'm1-p7-lesson1__videos__chapter_13': 'https://www.aparat.com/video/video/embed/videohash/mjr3k81/vt/frame',
+        'm1-p7-lesson1__videos__chapter_14': 'https://www.aparat.com/video/video/embed/videohash/exl0ys3/vt/frame'
 
     };
 
