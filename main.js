@@ -13,35 +13,11 @@ function getSavedStudentUsername() {
         let atrakSelectedNewsId = null;
 
         /* =========================================================
-           تاریخچه ناوبری پایدار
-           فقط تاریخچه صفحات عمومی/مدیریتی را در مرورگر نگه می‌دارد.
-           محتوای LMS را تغییر نمی‌دهد.
+           تاریخچه ناوبری
+           مدیریت کامل تاریخچه (ثبت صفحه‌ها، دکمه‌ی قبلی/بعدی، دکمه‌ی بک مرورگر
+           و بازگردانی بعد از F5) در فایل js/nav-fix.js انجام می‌شود.
+           این‌جا فقط مقدار اولیه‌ی state نگه داشته می‌شود.
         ========================================================= */
-        const ATRAk_HISTORY_STORAGE_KEY = 'atrak_navigation_history_v1';
-
-        function persistNavigationHistory(target) {
-            try {
-                const fullHistory = Array.isArray(target.history) && target.history.length
-                    ? target.history.filter(item => typeof item === 'string')
-                    : ['home'];
-                const fullIndex = Number.isFinite(Number(target.historyIndex))
-                    ? Number(target.historyIndex)
-                    : fullHistory.length - 1;
-                const safeIndex = Math.max(0, Math.min(fullIndex, fullHistory.length - 1));
-
-                // فقط ۵۰ مورد آخر ذخیره می‌شوند و اندیس همزمان با برش اصلاح می‌شود.
-                const start = Math.max(0, fullHistory.length - 50);
-                const history = fullHistory.slice(start);
-                const historyIndex = Math.max(0, Math.min(safeIndex - start, history.length - 1));
-
-                localStorage.setItem(
-                    ATRAk_HISTORY_STORAGE_KEY,
-                    JSON.stringify({ history, historyIndex })
-                );
-            } catch (historySaveError) {
-                console.warn('ذخیره تاریخچه ناوبری انجام نشد:', historySaveError);
-            }
-        }
 
       let state = new Proxy({
     theme: localStorage.getItem('atrak_theme') || 'light',
@@ -53,66 +29,12 @@ function getSavedStudentUsername() {
     _historyNavigation: false
 }, {
     set(target, property, value) {
-
-        if (
-            property === 'currentView' &&
-            target.currentView !== value &&
-            target._historyNavigation !== true
-        ) {
-            target.history =
-                target.history.slice(0, target.historyIndex + 1);
-
-            target.history.push(value);
-
-            target.historyIndex =
-                target.history.length - 1;
-        }
-
+        /* تاریخچه دیگر این‌جا و به‌صورت خودکار ساخته نمی‌شود؛ js/nav-fix.js
+           تنها مسئول ثبت و بازگردانی صفحه‌هاست تا دکمه‌ی بک هیچ‌وقت به صفحه‌ی اشتباه نرود. */
         target[property] = value;
-
-        /* تاریخچه بعد از هر تغییر ناوبری ذخیره شود تا با F5 از بین نرود. */
-        if (property === 'currentView' || property === 'history' || property === 'historyIndex') {
-            persistNavigationHistory(target);
-        }
-
         return true;
     }
 });
-
-        /* بازیابی تاریخچه قبلی؛ اگر خراب باشد، تاریخچه استاندارد از صفحه اصلی شروع می‌شود. */
-        try {
-            const savedHistory = JSON.parse(
-                localStorage.getItem(ATRAk_HISTORY_STORAGE_KEY) || 'null'
-            );
-            if (
-                savedHistory &&
-                Array.isArray(savedHistory.history) &&
-                savedHistory.history.length &&
-                savedHistory.history.every(item => typeof item === 'string')
-            ) {
-                const validHistory = savedHistory.history.filter(item => item === 'home' || views[item]);
-                if (validHistory.length) {
-                    const originalIndex = Math.max(
-                        0,
-                        Math.min(
-                            Number(savedHistory.historyIndex) || 0,
-                            validHistory.length - 1
-                        )
-                    );
-                    const start = Math.max(0, validHistory.length - 50);
-                    state.history = validHistory.slice(start);
-                    state.historyIndex = Math.max(
-                        0,
-                        Math.min(originalIndex - start, state.history.length - 1)
-                    );
-                    persistNavigationHistory(state);
-                }
-            }
-        } catch (historyLoadError) {
-            console.warn('بازیابی تاریخچه ناوبری انجام نشد:', historyLoadError);
-            state.history = ['home'];
-            state.historyIndex = 0;
-        }
 
         let activeEditableElement = null;
         let targetIconSvgElement = null;
@@ -6055,7 +5977,7 @@ function closeDynamicFormModal(){const m=document.getElementById('atrakDynamicFo
 function saveDynamicForm(type,id){
     const text=document.getElementById('dynFormText')?.value||'';
     if(!text.trim()){alert('لطفاً متن را وارد کنید.');return;}
-       const textAuto=document.getElementById('dynTextColorAuto')?.checked;
+     const textAuto=document.getElementById('dynTextColorAuto')?.checked;
     const patch={text,color:textAuto?'':(document.getElementById('dynTextColor')?.value||''),opacity:Number(document.getElementById('dynOpacity')?.value||1)};
     if(type==='box'){
         const bgAuto=document.getElementById('dynBgColorAuto')?.checked;
@@ -6224,7 +6146,7 @@ function renderAtrakDynamicElements(){
         el.className='atrak-dynamic-item'+(item.id===atrakDynamicSelectedId?' admin-selected':'');el.dataset.id=item.id;
         el.style.left=item.x+'px';el.style.top=item.y+'px';el.style.width=item.w+'px';el.style.height=item.h+'px';el.style.zIndex=String(item.z||40);el.style.opacity=item.opacity;
         let inner='';
-        if(item.type==='box')inner=`<div class="atrak-drag-surface atrak-dynamic-box" style="${!dynIsAutoColor(item.bg,'#ffffff')&&safeDynColor(item.bg)?'background:'+safeDynColor(item.bg)+';':''}${!dynIsAutoColor(item.color,'#4a154b')&&safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
+                if(item.type==='box')inner=`<div class="atrak-drag-surface atrak-dynamic-box" style="${!dynIsAutoColor(item.bg,'#ffffff')&&safeDynColor(item.bg)?'background:'+safeDynColor(item.bg)+';':''}${!dynIsAutoColor(item.color,'#4a154b')&&safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
         if(item.type==='text')inner=`<div class="atrak-drag-surface atrak-dynamic-text" style="${!dynIsAutoColor(item.color,'#4a154b')&&safeDynColor(item.color)?'color:'+safeDynColor(item.color)+';':''}">${escDyn(item.text||'')}</div>`;
         if(item.type==='image')inner=`<div class="atrak-drag-surface atrak-dynamic-image-wrap"><img class="atrak-dynamic-image" src="${escDyn(item.image||'')}" alt="" onerror="this.style.opacity='.25'" decoding="async" loading="lazy"></div>`;
         if(item.type==='icon')inner=`<div class="atrak-drag-surface atrak-dynamic-icon" style="color:${safeDynColor(item.color,'#ec4899')};"><svg viewBox="0 0 24 24">${iconLibrary100[Number(item.iconIndex)||0]||iconLibrary100[0]}</svg></div>`;
@@ -6663,6 +6585,18 @@ function generatePageTableOfContents() {
         return;
     }
 
+
+    /*
+     * صفحه‌های پویا (سوالات، فیلم‌ها، جزوه‌ها و ...) داخل views نیستند.
+     * قبلاً برای این صفحه‌ها «صفحه اصلی» نمایش داده می‌شد و دکمه‌ی بک کاربر را
+     * به صفحه‌ی اول می‌فرستاد. حالا همان صفحه‌ی پویا دوباره باز می‌شود.
+     */
+    if (state.currentView !== 'home' && !views[state.currentView]) {
+        if (window.AtrakNav && typeof window.AtrakNav.refreshCurrent === 'function') {
+            window.AtrakNav.refreshCurrent();
+            return;
+        }
+    }
 
     /*
      * ابتدا محتوای صفحه را می‌سازیم
@@ -9265,10 +9199,7 @@ function enableAdminEditableFields() {
             el.closest('#adminLoginModal') ||
             el.closest('#questionAdminModal') ||
             el.closest('#questionEditorModal') ||
-                       el.closest('#iconPickerModal') ||
-            el.closest('#atrakHonorModal') ||
-            el.closest('.atrak-honors-grid') ||
-            el.closest('.atrak-honors-admin-box')
+            el.closest('#iconPickerModal')
         ) {
             return;
         }
@@ -9304,7 +9235,7 @@ function enableAdminEditableFields() {
                     ? state.currentView
                     : 'default';
 
-           const currentLesson =
+            const currentLesson =
     (window.currentLessonId || '') +
     (state.currentView === 'question-chapter' && window.currentQuestionChapterId
         ? '-' + window.currentQuestionChapterId
