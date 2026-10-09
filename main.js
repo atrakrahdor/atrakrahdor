@@ -9832,22 +9832,15 @@ function getLegacyIconStorageKey(svg) {
 
 }
 
-        function loadSavedImages() {
+function loadSavedImages() {
     const savedImages = localStorage.getItem('atrak_saved_images');
-
     if (!savedImages) return;
 
     try {
         const images = JSON.parse(savedImages);
-
         Object.keys(images).forEach(imageId => {
-            const img = document.getElementById(imageId);
-
-            if (img && images[imageId]) {
-                img.src = images[imageId];
-            }
+            if (images[imageId]) atrakApplyMedia(imageId, images[imageId]);
         });
-
     } catch (e) {
         console.log('خطا در بازیابی تصاویر:', e);
     }
@@ -9890,10 +9883,103 @@ function openIconPicker(e, targetSvg) {
             closeModal('iconPickerModal');
         }
 
+function atrakIsVideoSrc(src) {
+    return /^data:video\//i.test(src) ||
+           /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(src);
+}
+
+// نمایش تصویر یا ویدیو در همان المانی که id دارد (در صورت نیاز img را به video تبدیل می‌کند)
+function atrakApplyMedia(id, src) {
+    const el = document.getElementById(id);
+    if (!el || !src) return;
+
+    const wantVideo = atrakIsVideoSrc(src);
+    const isVideo = el.tagName === 'VIDEO';
+
+    if (wantVideo === isVideo) {
+        el.src = src;
+        return;
+    }
+
+    const n = document.createElement(wantVideo ? 'video' : 'img');
+    n.id = el.id;
+    n.className = el.className;
+    n.setAttribute('style', el.getAttribute('style') || '');
+    n.dataset.alt = el.getAttribute('alt') || el.dataset.alt || '';
+
+    if (wantVideo) {
+        n.muted = true;
+        n.defaultMuted = true;
+        n.autoplay = true;
+        n.loop = true;
+        n.playsInline = true;
+        n.controls = true;
+        n.preload = 'metadata';
+    } else {
+        n.alt = n.dataset.alt;
+        n.decoding = 'async';
+        n.loading = 'lazy';
+    }
+
+    n.src = src;
+    el.replaceWith(n);
+}
+
+// آپلود فایل در Supabase Storage و برگرداندن لینک عمومی
+async function atrakUploadMedia(file, imageId) {
+    const ext = ((file.name.split('.').pop() || 'bin').toLowerCase())
+        .replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = `${imageId}-${Date.now()}.${ext}`;
+
+    const headers = getSupabaseWriteHeaders();
+    delete headers.Prefer;
+    headers['Content-Type'] = file.type || 'application/octet-stream';
+    headers['x-upsert'] = 'true';
+
+    const res = await fetch(
+        `${SUPABASE_URL}/storage/v1/object/site-media/${path}`,
+        { method: 'POST', headers, body: file }
+    );
+
+    if (!res.ok) {
+        const details = await res.text().catch(() => '');
+        throw new Error(`${res.status} ${details}`);
+    }
+
+    return `${SUPABASE_URL}/storage/v1/object/public/site-media/${path}`;
+}
+
+// کم‌حجم کردن عکس قبل از آپلود (گیف و ویدیو دست نمی‌خورند)
+function atrakCompressImage(file, maxW = 1600, quality = 0.85) {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/') ||
+            file.type === 'image/gif' ||
+            file.type === 'image/svg+xml') {
+            return resolve(file);
+        }
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            const scale = Math.min(1, maxW / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            canvas.toBlob((blob) => {
+                if (!blob || blob.size >= file.size) return resolve(file);
+                const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+                resolve(new File([blob], name, { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+}
+
 function triggerImageUpload(imageId) {
     if (!state.isAdmin) return;
 
-    // اگر input در HTML نبود، خودش ساخته می‌شود
     let uploader = document.getElementById('globalImageUploader');
     if (!uploader) {
         uploader = document.createElement('input');
@@ -9904,64 +9990,36 @@ function triggerImageUpload(imageId) {
         document.body.appendChild(uploader);
     }
 
-    uploader.onchange = (evt) => {
-        const file = evt.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const img = document.getElementById(imageId);
-            if (!img) return;
-
-            const saveImage = (imageData) => {
-                img.src = imageData;
-
-                let savedImages = {};
-                try {
-                    savedImages = JSON.parse(
-                        localStorage.getItem('atrak_saved_images') || '{}'
-                    );
-                } catch (err) {
-                    savedImages = {};
-                }
-
-                savedImages[imageId] = imageData;
-
-                try {
-                    localStorage.setItem(
-                        'atrak_saved_images',
-                        JSON.stringify(savedImages)
-                    );
-                } catch (err) {
-                    alert('حجم عکس‌ها زیاد است و ذخیره نشد. یک عکس کم‌حجم‌تر انتخاب کنید.');
-                    return;
-                }
-
-                syncStateToCloud();
-            };
-
-            // فشرده‌سازی عکس تا حافظه مرورگر پر نشود
-            if (file.type.startsWith('image/') && file.type !== 'image/gif') {
-                const tmp = new Image();
-                tmp.onload = () => {
-                    const maxW = 1400;
-                    const scale = Math.min(1, maxW / tmp.width);
-                    const canvas = document.createElement('canvas');
-                    canvas.width = Math.round(tmp.width * scale);
-                    canvas.height = Math.round(tmp.height * scale);
-                    canvas.getContext('2d').drawImage(tmp, 0, 0, canvas.width, canvas.height);
-                    saveImage(canvas.toDataURL('image/jpeg', 0.82));
-                };
-                tmp.onerror = () => saveImage(e.target.result);
-                tmp.src = e.target.result;
-            } else {
-                saveImage(e.target.result);
-            }
-        };
-
-        reader.readAsDataURL(file);
+    uploader.onchange = async (evt) => {
+        const original = evt.target.files[0];
         uploader.value = '';
+        if (!original) return;
+
+        try {
+            const file = await atrakCompressImage(original);
+            const url = await atrakUploadMedia(file, imageId);
+
+            // فقط لینک کوتاه در localStorage ذخیره می‌شود، نه خود فایل
+            let savedImages = {};
+            try {
+                savedImages = JSON.parse(localStorage.getItem('atrak_saved_images') || '{}');
+            } catch (err) { savedImages = {}; }
+
+            savedImages[imageId] = url;
+
+            try {
+                localStorage.setItem('atrak_saved_images', JSON.stringify(savedImages));
+            } catch (err) {
+                alert('حافظهٔ مرورگر از عکس‌های قدیمی پر شده است. ابتدا کد انتقال عکس‌های قدیمی را اجرا کنید.');
+                return;
+            }
+
+            atrakApplyMedia(imageId, url);
+            syncStateToCloud();
+        } catch (err) {
+            console.error('خطا در آپلود:', err);
+            alert('آپلود انجام نشد.\n' + err.message);
+        }
     };
 
     uploader.click();
