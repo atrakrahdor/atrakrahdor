@@ -100,6 +100,8 @@
     var restored = false;
  
     async function restoreLocationOnce() {
+        // بازگردانی بعد از F5 اکنون توسط js/nav-fix.js (همراه با تاریخچه‌ی کامل) انجام می‌شود.
+        if (window.AtrakNav) return;
         if (restored) return;
         restored = true;
  
